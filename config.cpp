@@ -132,12 +132,15 @@ bool Config::getConfig(const char *FileName)
         lowLevel = CN_SP_ST_FS;
     } else if (lowLevelSearch == CNS_SP_ST_SCIPP) {
         lowLevel = CN_SP_ST_SCIPP;
+    } else if (lowLevelSearch == CNS_SP_ST_TKN) {
+        lowLevel = CN_SP_ST_TKN;
     } else {
         std::cout << "Error! Low level search '" << lowLevelSearch << "' is unknown." << std::endl;
         return false;
     }
 
-    if (searchType == CN_ST_CBS && !withFocalSearch && lowLevel != CN_SP_ST_ASTAR && lowLevel != CN_SP_ST_SIPP) {
+    if (searchType == CN_ST_CBS && !withFocalSearch &&
+            lowLevel != CN_SP_ST_ASTAR && lowLevel != CN_SP_ST_SIPP && lowLevel != CN_SP_ST_TKN) {
         std::cout << "Warning! Specified low level search can not be used in this algorithm. Using A* instead." << std::endl;
         lowLevel = CN_SP_ST_ASTAR;
     }
@@ -153,6 +156,7 @@ bool Config::getConfig(const char *FileName)
     getValueFromText(algorithm, CNS_TAG_WITH_DS, "bool", &withDisjointSplitting);
     getValueFromText(algorithm, CNS_TAG_FOCAL_W, "double", &focalW);
     getValueFromText(algorithm, CNS_TAG_SFO, "bool", &genSuboptFromOpt);
+    getValueFromText(algorithm, CNS_TAG_NEIGH_DEG, "int", &neighDegree);
 
     parallelizePaths1 = parallelizePaths1 || parallelizePaths2;
     storeConflicts = withFocalSearch || withBypassing || withMatchingHeuristic || withDisjointSplitting;

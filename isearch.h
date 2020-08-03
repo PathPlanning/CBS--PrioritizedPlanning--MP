@@ -7,6 +7,7 @@
 #include "conflict_avoidance_table.h"
 #include "search_queue.h"
 #include "weighted_sipp_node.h"
+#include "two_k_neigh_sipp_node.h"
 #include <list>
 #include <vector>
 #include <math.h>
@@ -92,8 +93,6 @@ class ISearch
 
         SearchResult                        sresult;
         std::list<Node>                     lppath, hppath;
-        double                              hweight;//weight of h-value
-        bool                                breakingties;//flag that sets the priority of nodes in addOpen function when their F-values is equal
         SearchQueue<NodeType>               open;
         std::unordered_map<int, NodeType>   close;
         bool                                withTime;

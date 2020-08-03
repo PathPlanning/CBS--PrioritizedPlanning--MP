@@ -4,6 +4,7 @@
 #include "isearch.h"
 #include "scipp.h"
 #include "weighted_sipp.h"
+#include "two_k_neigh_sipp.h"
 #include "cbs_node.h"
 #include "multiagent_search_result.h"
 #include "multiagent_search_inteface.h"
@@ -21,11 +22,13 @@ class ConflictBasedSearch : public MultiagentSearchInterface
         ConflictBasedSearch(SearchType* Search);
         ~ConflictBasedSearch(void);
         MultiagentSearchResult startSearch(const Map &map, const Config &config, AgentSet &agentSet) override;
-        template<typename Iter>
-        static ConflictSet findConflict(const std::vector<Iter> &starts, const std::vector<Iter> &ends,
-                                        int agentId = -1, bool findAllConflicts = false,
-                                        bool withCardinalConflicts = false, const std::vector<MDD> &mdds = std::vector<MDD>());
-    private:
+
+        virtual ConflictSet findConflict(const std::vector<std::list<Node>::iterator> &starts,
+                                 const std::vector<std::list<Node>::iterator> &ends,
+                                 int agentId = -1, bool findAllConflicts = false,
+                                 bool withCardinalConflicts = false,
+                                 const std::vector<MDD> &mdds = std::vector<MDD>()) override;
+    //private:
         std::list<Node> getNewPath(const Map &map, const AgentSet &agentSet, const Agent &agent,
                                    const Constraint &constraint, const ConstraintsSet &constraints,
                                    const std::list<Node>::iterator pathStart,
@@ -47,12 +50,12 @@ class ConflictBasedSearch : public MultiagentSearchInterface
 };
 
 template<typename SearchType>
-template<typename Iter>
-ConflictSet ConflictBasedSearch<SearchType>::findConflict(const std::vector<Iter> &starts, const std::vector<Iter> &ends,
-                                           int agentId, bool findAllConflicts,
-                                           bool withCardinalConflicts, const std::vector<MDD> &mdds) {
+ConflictSet ConflictBasedSearch<SearchType>::findConflict(const std::vector<std::list<Node>::iterator> &starts,
+                                                          const std::vector<std::list<Node>::iterator> &ends,
+                                                          int agentId, bool findAllConflicts,
+                                                          bool withCardinalConflicts, const std::vector<MDD> &mdds) {
     ConflictSet conflictSet;
-    std::vector<Iter> iters = starts;
+    std::vector<std::list<Node>::iterator> iters = starts;
     std::vector<int> order;
     for (int i = 0; i < iters.size(); ++i) {
         if (i != agentId) {

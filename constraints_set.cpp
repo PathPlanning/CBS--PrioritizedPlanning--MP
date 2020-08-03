@@ -108,13 +108,14 @@ int ConstraintsSet::getFirstConstraintTime(int i, int j, int startTime, int agen
 }
 
 std::vector<std::pair<int, int>> ConstraintsSet::getSafeIntervals(int i, int j, int agentId,
-                                                                  int startTime, int endTime) const {
+                                                                  int startTime, int endTime,
+                                                                  int duration) const {
     int goalConstraintTime = -1;
     auto it = goalNodeConstraints.lower_bound(Constraint(i, j, 0));
     if (it != goalNodeConstraints.end() && it->i == i && it->j == j) {
         goalConstraintTime = it->time;
         if (goalConstraintTime <= endTime) {
-            endTime = goalConstraintTime - 1;
+            endTime = goalConstraintTime - duration;
         }
         if (endTime < startTime) {
             return {};
@@ -133,8 +134,8 @@ std::vector<std::pair<int, int>> ConstraintsSet::getSafeIntervals(int i, int j, 
     std::vector<std::pair<int, int>> res;
     auto end = nodeConstraints.upper_bound(Constraint(i, j, endTime, agentId));
     for (it; it != end; ++it) {
-        if (it->time > beg) {
-            res.push_back(std::make_pair(beg, it->time - 1));
+        if (it->time >= beg + duration) {
+            res.push_back(std::make_pair(beg, it->time - duration));
         }
         beg = it->time + it->dur;
     }
@@ -142,12 +143,14 @@ std::vector<std::pair<int, int>> ConstraintsSet::getSafeIntervals(int i, int j, 
     if (beg <= endTime) {
         endTime = CN_INFINITY;
         if (goalConstraintTime != -1) {
-            endTime = goalConstraintTime - 1;
+            endTime = goalConstraintTime - duration;
         }
         if (end != nodeConstraints.end() && end->i == i && end->j == j && end->time - 1 < endTime) {
-            endTime = end->time - 1;
+            endTime = end->time - duration;
         }
-        res.push_back(std::make_pair(beg, endTime));
+        if (beg <= endTime) {
+            res.push_back(std::make_pair(beg, endTime));
+        }
     }
     return res;
 }

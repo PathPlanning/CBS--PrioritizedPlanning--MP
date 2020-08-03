@@ -3,8 +3,6 @@
 template<typename NodeType>
 ISearch<NodeType>::ISearch(bool WithTime)
 {
-    hweight = 1;
-    breakingties = CN_SP_BT_GMAX;
     withTime = WithTime;
 }
 
@@ -136,7 +134,7 @@ std::list<NodeType> ISearch<NodeType>::findSuccessors(const NodeType &curNode, c
             int newi = curNode.i + di, newj = curNode.j + dj;
             if ((di == 0 || dj == 0) && (canStay() || di != 0 || dj != 0) && map.CellOnGrid(newi, newj) &&
                     map.CellIsTraversable(newi, newj, occupiedNodes)) {
-                int newh = computeHFromCellToCell(newi, newj, goal_i, goal_j);
+                double newh = computeHFromCellToCell(newi, newj, goal_i, goal_j);
                 NodeType neigh(newi, newj, nullptr, curNode.g + 1, newh);
                 neigh.conflictsCount = CAT.getAgentsCount(neigh);
                 createSuccessorsFromNode(curNode, neigh, successors, agentId, constraints, CAT,
@@ -239,3 +237,4 @@ template class ISearch<SIPPNode>;
 template class ISearch<WeightedSIPPNode>;
 template class ISearch<SCIPPNode>;
 template class ISearch<FSNode>;
+template class ISearch<TwoKNeighSIPPNode>;

@@ -3,9 +3,10 @@
 
 #include "map.h"
 #include "agent_set.h"
-#include "push_and_rotate.h"
 #include "conflict_based_search.h"
+#include "mp_conflict_based_search.h"
 #include "prioritized_planning.h"
+#include "push_and_rotate.h"
 #include "config.h"
 #include "isearch.h"
 #include "ilogger.h"
@@ -49,7 +50,7 @@ class Mission
         bool checkCorrectness();
         void saveAggregatedResultsToLog();
         void saveSeparateResultsToLog();
-        std::pair<int, int> getCosts();
+        std::pair<double, double> getCosts();
         int getTasksCount();
         std::string getAgentsFile();
         bool getSingleExecution();

@@ -98,6 +98,8 @@ void Mission::createAlgorithm()
             multiagentSearch = new ConflictBasedSearch<FocalSearch<>>(new FocalSearch<>(true, config.focalW));
         } else if (config.lowLevel == CN_SP_ST_SCIPP) {
             multiagentSearch = new ConflictBasedSearch<SCIPP<>>(new SCIPP<>(config.focalW));
+        } else if (config.lowLevel == CN_SP_ST_TKN) {
+            multiagentSearch = new MPConflictBasedSearch<TwoKNeighSIPP<>>(new TwoKNeighSIPP<>(config.neighDegree));
         }
     } else if (config.searchType == CN_ST_PP) {
         if (config.lowLevel == CN_SP_ST_ASTAR) {
@@ -167,9 +169,9 @@ void Mission::startSearch(const std::string &agentsFile)
         }
 
         agentsPaths = *(sr.agentsPaths);
-        std::pair<int, int> costs = getCosts();
-        int makespan = costs.first;
-        int flowtime = costs.second;
+        std::pair<double, double> costs = getCosts();
+        double makespan = costs.first;
+        double flowtime = costs.second;
 
         res.data[CNS_TAG_ATTR_MAKESPAN][i] = makespan;
         res.data[CNS_TAG_ATTR_FLOWTIME][i] = flowtime;
@@ -192,15 +194,21 @@ void Mission::startSearch(const std::string &agentsFile)
     testingResults.push_back(res);
 }
 
-std::pair<int, int> Mission::getCosts() {
-    size_t makespan = 0, timeflow = 0;
+std::pair<double, double> Mission::getCosts() {
+    double makespan = 0, flowtime = 0;
     for (int i = 0; i < agentsPaths.size(); ++i) {
-        makespan = std::max(makespan, agentsPaths[i].size() - 1);
-        int lastMove;
-        for (lastMove = agentsPaths[i].size() - 1; lastMove > 1 && agentsPaths[i][lastMove] == agentsPaths[i][lastMove - 1]; --lastMove);
-        timeflow += lastMove;
+        if (config.lowLevel == CN_SP_ST_TKN) {
+            double time = double(agentsPaths[i].back().g) / CN_PRECISION;
+            makespan = std::max(makespan, time);
+            flowtime += time;
+        } else {
+            makespan = std::max(makespan, double(agentsPaths[i].size() - 1));
+            int lastMove;
+            for (lastMove = agentsPaths[i].size() - 1; lastMove > 1 && agentsPaths[i][lastMove] == agentsPaths[i][lastMove - 1]; --lastMove);
+            flowtime += lastMove;
+        }
     }
-    return std::make_pair(makespan, timeflow);
+    return std::make_pair(makespan, flowtime);
 }
 
 bool Mission::checkCorrectness() {
@@ -209,7 +217,8 @@ bool Mission::checkCorrectness() {
     for (int j = 0; j < agentCount; ++j) {
         solutionSize = std::max(solutionSize, agentsPaths[j].size());
     }
-    std::vector<std::vector<Node>::iterator> starts, ends;
+    std::vector<std::list<Node>> lists;
+    std::vector<std::list<Node>::iterator> starts, ends;
     for (int j = 0; j < agentCount; ++j) {
         if (agentsPaths[j][0] != agentSet.getAgent(j).getStartPosition()) {
             std::cout << "Incorrect result: agent path starts in wrong position!" << std::endl;
@@ -219,8 +228,12 @@ bool Mission::checkCorrectness() {
             std::cout << "Incorrect result: agent path ends in wrong position!" << std::endl;
             return false;
         }
-        starts.push_back(agentsPaths[j].begin());
-        ends.push_back(agentsPaths[j].end());
+        lists.push_back(std::list<Node>(agentsPaths[j].begin(), agentsPaths[j].end()));
+        starts.push_back(lists.back().begin());
+        ends.push_back(lists.back().end());
+
+        auto pr = *std::prev(ends.back());
+        int q = 0;
     }
 
     for (int i = 0; i < solutionSize; ++i) {
@@ -232,7 +245,7 @@ bool Mission::checkCorrectness() {
                 std::cout << "Incorrect result: agent path goes through obstacle!" << std::endl;
                 return false;
             }
-            if (i > 0 &&
+            if (i > 0 && config.lowLevel != CN_SP_ST_TKN &&
                 abs(agentsPaths[j][i].i - agentsPaths[j][i - 1].i) +
                 abs(agentsPaths[j][i].j - agentsPaths[j][i - 1].j) > 1) {
                 std::cout << "Incorrect result: consecutive nodes in agent path are not adjacent!" << std::endl;
@@ -240,7 +253,13 @@ bool Mission::checkCorrectness() {
             }
         }
     }
-    ConflictSet conflictSet = ConflictBasedSearch<>::findConflict<std::vector<Node>::iterator>(starts, ends);
+    /*ConflictSet conflictSet;
+    if (config.lowLevel == CN_SP_ST_TKN) {
+        conflictSet = multiagentSearch->findConflict(starts, ends);
+    } else {
+        ConflictBasedSearch<> cbs;
+        conflictSet = cbs.findConflict(starts, ends);
+    }
     if (!conflictSet.empty()) {
         Conflict conflict = conflictSet.getBestConflict();
         if (conflict.edgeConflict) {
@@ -249,7 +268,7 @@ bool Mission::checkCorrectness() {
             std::cout << "Incorrect result: two agents occupy the same node!" << std::endl;
         }
         return false;
-    }
+    }*/
     return true;
 }
 

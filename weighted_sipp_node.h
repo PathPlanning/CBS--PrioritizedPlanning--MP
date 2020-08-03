@@ -7,7 +7,7 @@ struct WeightedSIPPNode : public SIPPNode
 {
     bool optimal;
 
-    WeightedSIPPNode(int x = 0, int y = 0, Node *p = nullptr, int g_ = 0, int H_ = 0, int ConflictsCount = 0, bool Optimal = true) :
+    WeightedSIPPNode(int x = 0, int y = 0, Node *p = nullptr, int g_ = 0, double H_ = 0, int ConflictsCount = 0, bool Optimal = true) :
         Node(x, y, p, g_, H_, ConflictsCount),
         SIPPNode(x, y, p, g_, H_, ConflictsCount),
         optimal(Optimal) {}

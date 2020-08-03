@@ -29,12 +29,15 @@ SOURCES += \
     constraints_set.cpp \
     focalsearch.cpp \
     mdd.cpp \
+    mp_conflict_based_search.cpp \
+    multiagent_search_interface.cpp \
     prioritized_planning.cpp \
     push_and_rotate.cpp \
     scipp.cpp \
     search_queue.cpp \
     sipp.cpp \
     tinyxml2.cpp \
+    two_k_neigh_sipp.cpp \
     weighted_sipp.cpp \
     xmllogger.cpp \
     isearch.cpp \
@@ -59,6 +62,8 @@ HEADERS += \
     focalsearch.h \
     fs_node.h \
     mdd.h \
+    motion_primitives.h \
+    mp_conflict_based_search.h \
     multiagent_search_inteface.h \
     multiagent_search_result.h \
     prioritized_planning.h \
@@ -72,6 +77,8 @@ HEADERS += \
     tinyxml2.h \
     node.h \
     gl_const.h \
+    two_k_neigh_sipp.h \
+    two_k_neigh_sipp_node.h \
     weighted_sipp.h \
     weighted_sipp_node.h \
     xmllogger.h \

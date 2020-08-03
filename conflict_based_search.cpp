@@ -137,7 +137,7 @@ CBSNode ConflictBasedSearch<SearchType>::createNode(const Map &map, const AgentS
     node.paths[id1] = newPath;
     for (int i = 0; i < costs.size(); ++i) {
         if (i == id1) {
-            node.cost += newPath.size() - 1;
+            node.cost += newPath.back().g;
         } else {
             node.cost += costs[i];
         }
@@ -156,7 +156,7 @@ CBSNode ConflictBasedSearch<SearchType>::createNode(const Map &map, const AgentS
     starts[id1] = node.paths[id1].begin();
     ends[id1] = node.paths[id1].end();
     if (config.storeConflicts) {
-        ConflictSet agentConflicts = findConflict<std::list<Node>::iterator>(starts, ends, id1, true,
+        ConflictSet agentConflicts = findConflict(starts, ends, id1, true,
                                                                              config.withCardinalConflicts, mdds);
         node.conflictSet = conflictSet;
         node.conflictSet.replaceAgentConflicts(id1, agentConflicts);
@@ -209,9 +209,15 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
     std::vector<MDD> mdds;
     for (int i = 0; i < agentSet.getAgentCount(); ++i) {
         Agent agent = agentSet.getAgent(i);
-        Astar<> astar(false, false);
-        SearchResult searchResult = astar.startSearch(map, agentSet, agent.getStart_i(), agent.getStart_j(),
+        Astar<> astar(false);
+        SearchResult searchResult;
+        if (config.lowLevel == CN_SP_ST_TKN) {
+            searchResult = search->startSearch(map, agentSet, agent.getStart_i(), agent.getStart_j(),
+                                               agent.getGoal_i(), agent.getGoal_j());
+        } else {
+            searchResult = astar.startSearch(map, agentSet, agent.getStart_i(), agent.getStart_j(),
                                                         agent.getGoal_i(), agent.getGoal_j());
+        }
         if (!searchResult.pathfound) {
             std::cout << "fail" << std::endl;
         }
@@ -232,8 +238,7 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
     }
 
     if (config.storeConflicts) {
-        root.conflictSet = findConflict<std::list<Node>::iterator>(starts, ends, -1, true,
-                                                                   config.withCardinalConflicts, mdds);
+        root.conflictSet = findConflict(starts, ends, -1, true, config.withCardinalConflicts, mdds);
         if (config.withFocalSearch) {
             root.hc = root.conflictSet.getConflictingPairsCount();
             sumLb.insert(root.sumLb);
@@ -283,7 +288,7 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
                 if (!agentFound[it->first]) {
                     starts[it->first] = it->second.begin();
                     ends[it->first] = it->second.end();
-                    costs[it->first] = it->second.size() - 1;
+                    costs[it->first] = it->second.back().g;
                     agentFound[it->first] = true;
 
                     if (config.withCAT || config.withFocalSearch == true) {
@@ -307,8 +312,7 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
 
         ConflictSet conflictSet;
         if (!config.storeConflicts) {
-            conflictSet = findConflict<std::list<Node>::iterator>(starts, ends, -1, false,
-                                                                  config.withCardinalConflicts, mdds);
+            conflictSet = findConflict(starts, ends, -1, false, config.withCardinalConflicts, mdds);
         } else {
             conflictSet = cur.conflictSet;
         }
@@ -338,6 +342,7 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
         }
 
         Conflict conflict = conflictSet.getBestConflict();
+
         if (config.withDisjointSplitting &&
                 mdds[conflict.id1].getLayerSize(conflict.time) < mdds[conflict.id2].getLayerSize(conflict.time)) {
             std::swap(conflict.id1, conflict.id2);
@@ -358,7 +363,48 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
             children.push_back(child2);
         }
 
-        for (auto child : children) {
+        /*for (auto child : children) {
+            for (auto c : constraints.nodeConstraints) {
+                if (c == child.constraint && c.agentId == child.constraint.agentId) {
+                    std::cout << t << " q" << std::endl;
+                }
+            }
+        }*/
+
+        /*for (auto child : children) {
+            auto newStarts = starts;
+            auto newEnds = ends;
+            newStarts[child.constraint.agentId] = child.paths.begin()->second.begin();
+            newEnds[child.constraint.agentId] = child.paths.begin()->second.end();
+            conflictSet = findConflict(newStarts, newEnds, -1, false, config.withCardinalConflicts, mdds);
+            for (auto c : conflictSet.nonCardinal) {
+                if (c.id1 == conflict.id1 && c.id2 == conflict.id2 &&
+                        c.pos1 == conflict.pos1 && c.time == conflict.time) {
+                    std::cout << "q\n" << std::endl;
+                }
+            }
+        }*/
+
+        /*for (auto child : children) {
+            for (auto constraint : constraints.nodeConstraints) {
+                if (constraint.agentId == child.paths.begin()->first) {
+                    for (auto it = child.paths.begin()->second.begin(); it != child.paths.begin()->second.end(); ++it) {
+                        if (std::next(it) != child.paths.begin()->second.end()) {
+                            auto pr = this->mp.getPrimitive(std::next(it)->primitiveId);
+                            for (auto cell : pr.cells) {
+                                if (it->i + cell.i == constraint.i && it->j + cell.j == constraint.j) {
+                                    int start = std::next(it)->g - int(pr.duration * CN_PRECISION) + int(cell.interval.first * CN_PRECISION);
+                                    int end = std::next(it)->g - int(pr.duration * CN_PRECISION) + int(cell.interval.second * CN_PRECISION);
+                                    if (start <= constraint.time && constraint.time <= end) {
+                                        std::cout << "1 " << t << std::endl;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             for (auto constraint : constraints.nodeConstraints) {
                 if (constraint.agentId == child.paths.begin()->first) {
                     auto it = child.paths.begin()->second.begin();
@@ -390,7 +436,7 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
                     }
                 }
             }
-        }
+        }*/
 
         bool bypass = false;
         if (children.size() == 2) {
@@ -437,3 +483,4 @@ template class ConflictBasedSearch<SIPP<>>;
 template class ConflictBasedSearch<WeightedSIPP<>>;
 template class ConflictBasedSearch<FocalSearch<>>;
 template class ConflictBasedSearch<SCIPP<>>;
+template class ConflictBasedSearch<TwoKNeighSIPP<>>;

@@ -6,7 +6,7 @@
 
 struct SCIPPNode : public SIPPNode, FSNode
 {
-    SCIPPNode(int x = 0, int y = 0, Node *p = nullptr, int g_ = 0, int H_ = 0, int ConflictsCount = 0, int hc_ = 0) :
+    SCIPPNode(int x = 0, int y = 0, Node *p = nullptr, int g_ = 0, double H_ = 0, int ConflictsCount = 0, int hc_ = 0) :
         Node(x, y, p, g_, H_, ConflictsCount),
         SIPPNode(x, y, p, g_, H_, ConflictsCount),
         FSNode(x, y, p, g_, H_, ConflictsCount, hc_)

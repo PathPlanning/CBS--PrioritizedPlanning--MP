@@ -8,9 +8,9 @@ template <typename NodeType = WeightedSIPPNode>
 class WeightedSIPP : public SIPP<NodeType>
 {
 public:
-    WeightedSIPP(double Weight = 1.0, bool GenSuboptFromOpt = false, double HW = 1.0, bool BT = true) :
-        Astar<NodeType>(true, HW, BT),
-        SIPP<NodeType>(HW, BT), weight(Weight), genSuboptFromOpt(GenSuboptFromOpt)  {}
+    WeightedSIPP(double Weight = 1.0, bool GenSuboptFromOpt = false) :
+        Astar<NodeType>(true),
+        SIPP<NodeType>(), weight(Weight), genSuboptFromOpt(GenSuboptFromOpt)  {}
     virtual ~WeightedSIPP();
 
 protected:

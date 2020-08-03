@@ -9,7 +9,7 @@ template <typename NodeType = SIPPNode>
 class SIPP : virtual public Astar<NodeType>
 {
 public:
-    SIPP(double HW = 1.0, bool BT = true) : Astar<NodeType>(true, HW, BT) {}
+    SIPP() : Astar<NodeType>(true) {}
     virtual ~SIPP() {}
 
 protected:

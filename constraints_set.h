@@ -25,7 +25,8 @@ public:
     ConstraintsSet getAgentConstraints(int agentId) const;
     std::vector<Constraint> getPositiveConstraints() const;
     int getFirstConstraintTime(int i, int j, int startTime, int agentId) const;
-    std::vector<std::pair<int, int>> getSafeIntervals(int i, int j, int agentId, int startTime, int endTime) const;
+    std::vector<std::pair<int, int>> getSafeIntervals(int i, int j, int agentId,
+                                                      int startTime, int endTime, int duration = 1) const;
 
     bool hasNodeConstraint(int i, int j, int time, int agentId) const;
     bool hasFutureConstraint(int i, int j, int time, int agentId) const;

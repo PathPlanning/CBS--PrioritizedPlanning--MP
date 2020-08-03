@@ -21,6 +21,7 @@ class Config
         int             maxTime = 1000;
         std::string     agentsFile;
         int             tasksCount = 1;
+        int             neighDegree = 2;
         bool            withCAT = false;
         bool            withPerfectHeuristic = false;
         int             ppOrder = 0;

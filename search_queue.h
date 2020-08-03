@@ -4,6 +4,7 @@
 #include "node.h"
 #include "weighted_sipp_node.h"
 #include "scipp_node.h"
+#include "two_k_neigh_sipp_node.h"
 #include "fs_node.h"
 #include "map.h"
 #include <set>

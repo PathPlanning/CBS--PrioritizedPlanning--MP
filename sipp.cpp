@@ -73,3 +73,4 @@ bool SIPP<NodeType>::checkGoal(const NodeType &cur, int goalTime, int agentId, c
 template class SIPP<SIPPNode>;
 template class SIPP<WeightedSIPPNode>;
 template class SIPP<SCIPPNode>;
+template class SIPP<TwoKNeighSIPPNode>;

@@ -1,4 +1,5 @@
 #include "mission.h"
+#include "motion_primitives.h"
 
 int main(int argc, char* argv[])
 {
