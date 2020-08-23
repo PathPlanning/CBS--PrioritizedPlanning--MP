@@ -3,7 +3,7 @@
 
 #include "isearch.h"
 #include "scipp.h"
-#include "weighted_sipp.h"
+#include "zero_scipp.h"
 #include "two_k_neigh_sipp.h"
 #include "cbs_node.h"
 #include "multiagent_search_result.h"
@@ -23,12 +23,16 @@ class ConflictBasedSearch : public MultiagentSearchInterface
         ~ConflictBasedSearch(void);
         MultiagentSearchResult startSearch(const Map &map, const Config &config, AgentSet &agentSet) override;
 
-        virtual ConflictSet findConflict(const std::vector<std::list<Node>::iterator> &starts,
-                                 const std::vector<std::list<Node>::iterator> &ends,
-                                 int agentId = -1, bool findAllConflicts = false,
-                                 bool withCardinalConflicts = false,
-                                 const std::vector<MDD> &mdds = std::vector<MDD>()) override;
-    //private:
+        virtual ConflictSet findConflict(
+                const Map &map, const AgentSet &agentSet,
+                const ConstraintsSet &constraints, const std::vector<int> &costs,
+                std::vector<int> &LLExpansions, std::vector<int> &LLNodes,
+                const std::vector<std::list<Node>::iterator> &starts,
+                const std::vector<std::list<Node>::iterator> &ends,
+                int agentId = -1, bool findAllConflicts = false,
+                bool withCardinalConflicts = false,
+                const std::vector<MDD> &mdds = std::vector<MDD>()) override;
+    protected:
         std::list<Node> getNewPath(const Map &map, const AgentSet &agentSet, const Agent &agent,
                                    const Constraint &constraint, const ConstraintsSet &constraints,
                                    const std::list<Node>::iterator pathStart,
@@ -50,10 +54,14 @@ class ConflictBasedSearch : public MultiagentSearchInterface
 };
 
 template<typename SearchType>
-ConflictSet ConflictBasedSearch<SearchType>::findConflict(const std::vector<std::list<Node>::iterator> &starts,
-                                                          const std::vector<std::list<Node>::iterator> &ends,
-                                                          int agentId, bool findAllConflicts,
-                                                          bool withCardinalConflicts, const std::vector<MDD> &mdds) {
+ConflictSet ConflictBasedSearch<SearchType>::findConflict(
+        const Map &map, const AgentSet &agentSet,
+        const ConstraintsSet &constraints, const std::vector<int> &costs,
+        std::vector<int> &LLExpansions, std::vector<int> &LLNodes,
+        const std::vector<std::list<Node>::iterator> &starts,
+        const std::vector<std::list<Node>::iterator> &ends,
+        int agentId, bool findAllConflicts,
+        bool withCardinalConflicts, const std::vector<MDD> &mdds) {
     ConflictSet conflictSet;
     std::vector<std::list<Node>::iterator> iters = starts;
     std::vector<int> order;

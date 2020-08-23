@@ -1,4 +1,3 @@
-# [English documentation](README-EN.md)
 # Push-and-Rotate--CBS--PrioritizedPlanning
 
 В данном проекте приводятся реализации различных алгоритмов решающих задачи планирования траекторий для группы агентов. Рассматриваются алгоритмы [Conflict based search](https://www.aaai.org/ocs/index.php/AAAI/AAAI12/paper/viewFile/5062/5239), [Enhanced conflict based search](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875), [Push and rotate](https://pdfs.semanticscholar.org/0a84/5fa6530f84b5df50d652a5e4eecc38d77681.pdf) и [Prioritized planning](https://arxiv.org/pdf/1409.2399.pdf), а также некоторые их модификации.

@@ -234,7 +234,7 @@ void ISearch<NodeType>::makeSecondaryPath(const Map &map)
 
 template class ISearch<Node>;
 template class ISearch<SIPPNode>;
-template class ISearch<WeightedSIPPNode>;
+template class ISearch<ZeroSCIPPNode>;
 template class ISearch<SCIPPNode>;
 template class ISearch<FSNode>;
 template class ISearch<TwoKNeighSIPPNode>;

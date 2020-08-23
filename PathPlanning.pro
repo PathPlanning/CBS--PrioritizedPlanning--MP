@@ -38,7 +38,6 @@ SOURCES += \
     sipp.cpp \
     tinyxml2.cpp \
     two_k_neigh_sipp.cpp \
-    weighted_sipp.cpp \
     xmllogger.cpp \
     isearch.cpp \
     mission.cpp \
@@ -46,7 +45,8 @@ SOURCES += \
     dijkstra.cpp \
     config.cpp \
     astar.cpp \
-    main.cpp
+    main.cpp \
+    zero_scipp.cpp
 
 HEADERS += \
     agent.h \
@@ -79,8 +79,6 @@ HEADERS += \
     gl_const.h \
     two_k_neigh_sipp.h \
     two_k_neigh_sipp_node.h \
-    weighted_sipp.h \
-    weighted_sipp_node.h \
     xmllogger.h \
     isearch.h \
     mission.h \
@@ -89,15 +87,21 @@ HEADERS += \
     dijkstra.h \
     config.h \
     astar.h \
-    searchresult.h
+    searchresult.h \
+    zero_scipp.h \
+    zero_scipp_node.h
 
 DISTFILES += \
     CMakeLists.txt \
     Examples/empty-16-16-random-1.xml \
     Examples/empty-16-16-random-2.xml \
-    Examples/empty.xml \
+    Examples/empty_batch_aggregated.xml \
+    Examples/empty_batch_aggregated_log.xml \
+    Examples/empty_batch_full.xml \
+    Examples/empty_batch_full_log.xml \
     Examples/empty_log.xml \
     Examples/empty_single.xml \
     Examples/empty_single_log.xml \
-    README-EN.md \
+    Examples/empty_single_log.xml \
+    README-RU.md \
     README.md

@@ -19,7 +19,7 @@ class Cell
     Cell(int i_, int j_):i(i_), j(j_){}
     int i;
     int j;
-    std::pair<double, double> interval;
+    std::pair<int, int> interval;
     bool operator <(const Cell& other) const
     {
         if(i == other.i)
@@ -95,6 +95,7 @@ public:
     int type;
     double begin;
     double duration;
+    int intDuration;
     Position source;
     Position target;
     double agentSize;
@@ -117,6 +118,11 @@ public:
             c.j = j + c.j;
         }
     }
+
+    double clip(double begin, double end, double val) {
+        return std::max(begin, std::min(val, end));
+    }
+
     double getEndpoint(Cell cell, double begin, double end, double resolution, double size, bool start)
     {
         if(resolution < CN_RESOLUTION)
@@ -130,8 +136,10 @@ public:
         while(true)
         {
             Point pos = this->getPos(cur_t);
-            double dist = pow(pos.i - cell.i, 2) + pow(pos.j - cell.j, 2);
-            if((start && dist < pow(size + agentSize,2)) || (!start && dist > pow(size + agentSize,2)))
+            double closest_i = clip(double(cell.i) - size, double(cell.i) + size, pos.i);
+            double closest_j = clip(double(cell.j) - size, double(cell.j) + size, pos.j);
+            double dist = pow(pos.i - closest_i, 2) + pow(pos.j - closest_j, 2);
+            if((start && dist < pow(agentSize, 2)) || (!start && dist > pow(agentSize, 2)))
             {
                 if(cur_t - resolution < 0)
                     return 0;
@@ -147,7 +155,7 @@ public:
             }
         }
     }
-    std::pair<double, double> getInterval(int i, int j, double size)
+    std::pair<int, int> getInterval(int i, int j)
     {
         auto it = std::find(cells.begin(), cells.end(), Cell(i,j));
         if(it == cells.end())
@@ -179,15 +187,21 @@ public:
         p.i = i_coefficients[0] + i_coefficients[1]*t + i_coefficients[2]*t*t + i_coefficients[3]*t*t*t;
         return p;
     }
-    void countIntervals(double size)
+    int doubleToInt(double val, int time_resolution) {
+        return int(val * time_resolution);
+    }
+
+    void countIntervals(double size, int time_resolution)
     {
         double r = size + agentSize;
         for(auto &c:cells)
         {
-            c.interval.first = getEndpoint(c, 0, duration, 0.01, size, true);
+            double start = getEndpoint(c, 0, duration, 0.01, size, true);
+            c.interval.first = doubleToInt(start, time_resolution);
             if(c.interval.first < 0)
                 continue;
-            c.interval.second = getEndpoint(c, c.interval.first + CN_RESOLUTION*2, duration, 0.01, size, false);
+            c.interval.second = doubleToInt(getEndpoint(c, start + CN_RESOLUTION*2,
+                                                        duration, 0.01, size, false), time_resolution);
             if(c.interval.first > c.interval.second)
                 c.interval.first = -1;
         }
@@ -250,6 +264,7 @@ class Primitives
     public:
     std::vector<std::vector<Primitive>> type0;
     std::vector<std::vector<Primitive>> type1;
+    int time_resolution;
     bool loadPrimitives(const char* FileName)
     {
         std::string value;
@@ -302,7 +317,7 @@ class Primitives
                 prim.j_coefficients.push_back(coef->DoubleAttribute("a4"));
 
                 prim.countCells();
-                prim.countIntervals(0.5);
+                prim.countIntervals(0.5, 1000);
                 if(prim.type == 0)
                 {
                     if(type0.empty() || type0.back().at(0).source.angle_id != prim.source.angle_id)
@@ -334,7 +349,7 @@ class Primitives
             }
         }
     }
-    Primitive getPrimitive(int id)
+    Primitive getPrimitive(int id) const
     {
         for(auto p:type0)
             for(auto t:p)
@@ -364,22 +379,26 @@ class Primitives
         return prims;
     }
 
-    void makeTwoKNeigh(int k) {
-        std::set<std::pair<int, int>> neigh = {{0, 1}, {1, 0}};
+    void makeTwoKNeigh(int k, int Time_resolution) {
+        time_resolution = Time_resolution;
+        std::vector<std::pair<int, int>> quad = {{1, 0}, {0, 1}};
 
         for (int i = 2; i < k; ++i) {
-            std::set<std::pair<int, int>> oldNeigh = neigh;
-            for (auto it1 = oldNeigh.begin(); it1 != oldNeigh.end(); ++it1) {
-                for (auto it2 = std::next(it1); it2 != oldNeigh.end(); ++it2) {
-                    int sum_i = it1->first + it2->first;
-                    int sum_j = it1->second + it2->second;
-                    neigh.insert(std::make_pair(sum_i, sum_j));
+            std::vector<std::pair<int, int>> newQuad;
+            for (auto it1 = quad.begin(); it1 != quad.end(); ++it1) {
+                newQuad.push_back(*it1);
+                if (std::next(it1) != quad.end()) {
+                    int sum_i = it1->first + std::next(it1)->first;
+                    int sum_j = it1->second + std::next(it1)->second;
+                    newQuad.push_back(std::make_pair(sum_i, sum_j));
                 }
             }
+            quad = newQuad;
         }
 
-        std::set<std::pair<int, int>> oldNeigh = neigh;
-        for (auto pair : oldNeigh) {
+        std::set<std::pair<int, int>> neigh;
+        for (auto pair : quad) {
+            neigh.insert(pair);
             neigh.insert(std::make_pair(-pair.first, pair.second));
             neigh.insert(std::make_pair(pair.first, -pair.second));
             neigh.insert(std::make_pair(-pair.first, -pair.second));
@@ -392,7 +411,8 @@ class Primitives
             prim.type = 1;
 
             prim.duration = sqrt(pair.first * pair.first + pair.second * pair.second);
-            prim.agentSize = 0.5;
+            prim.intDuration = prim.doubleToInt(prim.duration, time_resolution);
+            prim.agentSize = CN_SQRT_TWO / 4;
 
             prim.source.i = 0;
             prim.source.j = 0;
@@ -415,7 +435,7 @@ class Primitives
             prim.j_coefficients.push_back(0);
 
             prim.countCells();
-            prim.countIntervals(0.5);
+            prim.countIntervals(0.5, time_resolution);
             type1[0].push_back(prim);
         }
     }

@@ -14,7 +14,7 @@
 #include "astar.h"
 #include "dijkstra.h"
 #include "sipp.h"
-#include "weighted_sipp.h"
+#include "zero_scipp.h"
 #include "focalsearch.h"
 #include "scipp.h"
 #include "xmllogger.h"
@@ -46,7 +46,8 @@ class Mission
         void startSearch(const std::string &agentsFile);
         void printSearchResultsToConsole();
         void saveSearchResultsToLog();
-        void saveAgentsPathsToLog(const std::string &agentsFile, double time, int makespan, int flowtime);
+        void saveAgentsPathsToLog(const std::string &agentsFile, double time, double makespan, double flowtime,
+                                  int HLExpansions, int HLNodes, double LLExpansions, double LLNodes);
         bool checkCorrectness();
         void saveAggregatedResultsToLog();
         void saveSeparateResultsToLog();

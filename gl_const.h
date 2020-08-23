@@ -3,7 +3,6 @@
 
 #define CN_PI          3.14159265359
 #define CN_SQRT_TWO    1.41421356237
-#define CN_PRECISION   1000
 #define CN_INFINITY    1000000000
 #define CN_RESOLUTION  1e-6
 #define CN_EPSILON     1e-9
@@ -48,6 +47,7 @@
         #define CNS_TAG_WEIGHT      "weight"
         #define CNS_TAG_SFO         "gen_subopt_from_opt"
         #define CNS_TAG_NEIGH_DEG   "neigh_degree"
+        #define CNS_TAG_TIME_RES    "time_resolution"
         #define CNS_TAG_AR          "aggregated_results"
         #define CNS_TAG_LOW_LEVEL   "low_level"
         #define CNS_TAG_PP_ORDER    "pp_order"
@@ -58,6 +58,7 @@
         #define CNS_TAG_AGENTS_RANGE "agents_range"
             #define CNS_TAG_MIN     "min"
             #define CNS_TAG_MAX     "max"
+        #define CNS_TAG_AGENTS_STEP "agents_step"
 
     #define CNS_TAG_LOG             "log"
         #define CNS_TAG_MAPFN       "mapfilename"
@@ -129,7 +130,7 @@
         #define CNS_SP_ST_ASTAR         "astar"
         #define CNS_SP_ST_FS            "focal_search"
         #define CNS_SP_ST_SIPP          "sipp"
-        #define CNS_SP_ST_WSIPP         "weighted_sipp"
+        #define CNS_SP_ST_ZSCIPP        "zero_scipp"
         #define CNS_SP_ST_SCIPP         "scipp"
         #define CNS_SP_ST_TKN           "2k_neigh"
 
@@ -137,7 +138,7 @@
         #define CN_SP_ST_TIME_ASTAR     1
         #define CN_SP_ST_FS             2
         #define CN_SP_ST_SIPP           3
-        #define CN_SP_ST_WSIPP          4
+        #define CN_SP_ST_ZSCIPP         4
         #define CN_SP_ST_SCIPP          5
         #define CN_SP_ST_TKN            6
 

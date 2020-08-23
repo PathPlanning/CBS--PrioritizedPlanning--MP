@@ -14,10 +14,16 @@ public:
                                        const std::unordered_set<Node, NodeHash> &occupiedNodes,
                                        const ConstraintsSet &constraints,
                                        bool withCAT, const ConflictAvoidanceTable &CAT) override;
-    TwoKNeighSIPP(int k);
+    TwoKNeighSIPP(int k, int time_resolution);
     virtual ~TwoKNeighSIPP() {}
+    Primitives *getMP() { return &mp; };
 
-// private:
+private:
+    void getCellSafeIntervals(const Cell &cell,
+                              int startTime, int endTime,
+                              int agentId, const ConstraintsSet &constraints,
+                              std::vector<std::pair<int, int>> &safeIntervals);
+    int addWithInfCheck(const int lhs, const int rhs);
     void makePrimaryPath(Node &curNode, int endTime) override;
     void makeSecondaryPath(const Map &map) override {};
 

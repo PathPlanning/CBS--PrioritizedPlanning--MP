@@ -92,6 +92,7 @@ bool Config::getConfig(const char *FileName)
     getValueFromText(options, CNS_TAG_MAXTIME, "int", &maxTime);
     getValueFromText(options, CNS_TAG_SINGLE_EX, "bool", &singleExecution);
     getValueFromText(options, CNS_TAG_AR, "bool", &saveAggregatedResults);
+    getValueFromText(options, CNS_TAG_AGENTS_STEP, "int", &agentsStep);
 
 
     algorithm = getChild(root, CNS_TAG_ALG);
@@ -126,8 +127,8 @@ bool Config::getConfig(const char *FileName)
         lowLevel = CN_SP_ST_ASTAR;
     } else if (lowLevelSearch == CNS_SP_ST_SIPP) {
         lowLevel = CN_SP_ST_SIPP;
-    } else if (lowLevelSearch == CNS_SP_ST_WSIPP) {
-        lowLevel = CN_SP_ST_WSIPP;
+    } else if (lowLevelSearch == CNS_SP_ST_ZSCIPP) {
+        lowLevel = CN_SP_ST_ZSCIPP;
     } else if (lowLevelSearch == CNS_SP_ST_FS) {
         lowLevel = CN_SP_ST_FS;
     } else if (lowLevelSearch == CNS_SP_ST_SCIPP) {
@@ -157,9 +158,10 @@ bool Config::getConfig(const char *FileName)
     getValueFromText(algorithm, CNS_TAG_FOCAL_W, "double", &focalW);
     getValueFromText(algorithm, CNS_TAG_SFO, "bool", &genSuboptFromOpt);
     getValueFromText(algorithm, CNS_TAG_NEIGH_DEG, "int", &neighDegree);
+    getValueFromText(algorithm, CNS_TAG_TIME_RES, "int", &resolution);
 
     parallelizePaths1 = parallelizePaths1 || parallelizePaths2;
-    storeConflicts = withFocalSearch || withBypassing || withMatchingHeuristic || withDisjointSplitting;
+    storeConflicts = withFocalSearch || withBypassing || withMatchingHeuristic || withDisjointSplitting || withCardinalConflicts;
     withCardinalConflicts = withCardinalConflicts || withMatchingHeuristic || withDisjointSplitting;
     return true;
 }

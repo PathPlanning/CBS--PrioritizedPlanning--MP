@@ -30,7 +30,7 @@
 struct SearchResult
 {
         bool pathfound;
-        float pathlength; //if path not found, then pathlength=0
+        int pathlength; //if path not found, then pathlength=0
         const std::list<Node>* lppath; //path as the sequence of adjacent nodes (see above)
                                        //This is a pointer to the list of nodes that is actually created and hadled by ISearch class,
                                        //so no need to re-create them, delete them etc. It's just a trick to save some memory

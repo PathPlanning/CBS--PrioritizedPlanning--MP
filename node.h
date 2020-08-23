@@ -22,7 +22,7 @@ struct Node
         H = H_;
         F = g_ + H_;
         conflictsCount = ConflictsCount;
-        primitiveId = 0;
+        primitiveId = -1;
     }
 
     bool operator== (const Node &other) const {

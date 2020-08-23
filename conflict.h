@@ -6,6 +6,7 @@ struct Conflict {
     int id1, id2;
     Node pos1, pos2;
     int time;
+    int minIncrease;
     bool edgeConflict;
     bool conflictFound;
 
@@ -21,6 +22,11 @@ struct Conflict {
         time = Time;
         edgeConflict = EdgeConflict;
         conflictFound = true;
+        minIncrease = 0;
+    }
+
+    bool operator<(const Conflict &rhs) const {
+        return minIncrease < rhs.minIncrease || minIncrease == rhs.minIncrease && time < rhs.time;
     }
 };
 

@@ -92,14 +92,15 @@ void Mission::createAlgorithm()
             multiagentSearch = new ConflictBasedSearch<Astar<>>(new Astar<>(true));
         } else if (config.lowLevel == CN_SP_ST_SIPP) {
             multiagentSearch = new ConflictBasedSearch<SIPP<>>(new SIPP<>());
-        } else if (config.lowLevel == CN_SP_ST_WSIPP) {
-            multiagentSearch = new ConflictBasedSearch<WeightedSIPP<>>(new WeightedSIPP<>(config.focalW, config.genSuboptFromOpt));
+        } else if (config.lowLevel == CN_SP_ST_ZSCIPP) {
+            multiagentSearch = new ConflictBasedSearch<ZeroSCIPP<>>(new ZeroSCIPP<>(config.focalW, config.genSuboptFromOpt));
         } else if (config.lowLevel == CN_SP_ST_FS) {
             multiagentSearch = new ConflictBasedSearch<FocalSearch<>>(new FocalSearch<>(true, config.focalW));
         } else if (config.lowLevel == CN_SP_ST_SCIPP) {
             multiagentSearch = new ConflictBasedSearch<SCIPP<>>(new SCIPP<>(config.focalW));
         } else if (config.lowLevel == CN_SP_ST_TKN) {
-            multiagentSearch = new MPConflictBasedSearch<TwoKNeighSIPP<>>(new TwoKNeighSIPP<>(config.neighDegree));
+            multiagentSearch = new MPConflictBasedSearch<TwoKNeighSIPP<>>(new TwoKNeighSIPP<>(config.neighDegree,
+                                                                                              config.resolution));
         }
     } else if (config.searchType == CN_ST_PP) {
         if (config.lowLevel == CN_SP_ST_ASTAR) {
@@ -108,8 +109,8 @@ void Mission::createAlgorithm()
             multiagentSearch = new PrioritizedPlanning<SIPP<>>(new SIPP<>());
         } else if (config.lowLevel == CN_SP_ST_SCIPP) {
             multiagentSearch = new PrioritizedPlanning<SCIPP<>>(new SCIPP<>(config.focalW));
-        } else if (config.lowLevel == CN_SP_ST_WSIPP) {
-            multiagentSearch = new PrioritizedPlanning<WeightedSIPP<>>(new WeightedSIPP<>(config.focalW, config.genSuboptFromOpt));
+        } else if (config.lowLevel == CN_SP_ST_ZSCIPP) {
+            multiagentSearch = new PrioritizedPlanning<ZeroSCIPP<>>(new ZeroSCIPP<>(config.focalW, config.genSuboptFromOpt));
         }
     }
 }
@@ -151,7 +152,7 @@ void Mission::startSearch(const std::string &agentsFile)
     int minAgents = config.singleExecution ? config.maxAgents : config.minAgents;
     int maxAgents = config.maxAgents == -1 ? agentSet.getAgentCount() : config.maxAgents;
     TestingResults res;
-    for (int i = minAgents; i <= maxAgents; ++i) {
+    for (int i = minAgents; i <= maxAgents; i += config.agentsStep) {
         AgentSet curAgentSet;
         for (int j = 0; j < i; ++j) {
             Agent agent = agentSet.getAgent(j);
@@ -182,7 +183,8 @@ void Mission::startSearch(const std::string &agentsFile)
         res.data[CNS_TAG_ATTR_LLN][i] = sr.AvgLLNodes;
 
         if (config.singleExecution) {
-            saveAgentsPathsToLog(agentsFile, sr.time, makespan, flowtime);
+            saveAgentsPathsToLog(agentsFile, sr.time, makespan, flowtime,
+                                 sr.HLExpansions, sr.HLNodes, sr.AvgLLExpansions, sr.AvgLLNodes);
         }
         if (!checkCorrectness()) {
             std::cout << "Search returned incorrect results!" << std::endl;
@@ -198,7 +200,7 @@ std::pair<double, double> Mission::getCosts() {
     double makespan = 0, flowtime = 0;
     for (int i = 0; i < agentsPaths.size(); ++i) {
         if (config.lowLevel == CN_SP_ST_TKN) {
-            double time = double(agentsPaths[i].back().g) / CN_PRECISION;
+            double time = double(agentsPaths[i].back().g) / config.resolution;
             makespan = std::max(makespan, time);
             flowtime += time;
         } else {
@@ -314,9 +316,12 @@ void Mission::saveAggregatedResultsToLog() {
     logger->saveLog();
 }
 
-void Mission::saveAgentsPathsToLog(const std::string &agentsFile, double time, int makespan, int flowtime)
-{
-    logger->writeToLogAgentsPaths(agentSet, agentsPaths, agentsFile, time, makespan, flowtime);
+void Mission::saveAgentsPathsToLog(const std::string &agentsFile, double time,
+                                   double makespan, double flowtime,
+                                   int HLExpansions, int HLNodes,
+                                   double LLExpansions, double LLNodes) {
+    logger->writeToLogAgentsPaths(agentSet, agentsPaths, agentsFile, time, makespan, flowtime,
+                                  HLExpansions, HLNodes, LLExpansions, LLNodes);
     logger->saveLog();
 }
 

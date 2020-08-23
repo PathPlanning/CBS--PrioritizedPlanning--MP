@@ -22,6 +22,7 @@ class Config
         std::string     agentsFile;
         int             tasksCount = 1;
         int             neighDegree = 2;
+        int             resolution = 1000;
         bool            withCAT = false;
         bool            withPerfectHeuristic = false;
         int             ppOrder = 0;
@@ -36,6 +37,7 @@ class Config
         bool            withFocalSearch = false;
         bool            genSuboptFromOpt = false;
         bool            saveAggregatedResults = true;
+        int             agentsStep = 1;
         double          focalW = 1.0;
 
     private:
