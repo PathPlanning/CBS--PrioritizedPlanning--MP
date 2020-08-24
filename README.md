@@ -24,13 +24,10 @@ The main file contains two sections `map` and `options`:
 - low_level - algorithm, applied in the low level search in CBS, ECBS and Prioritized planning algorithms. Can take following values:
     1. astar - algorithm [A*](https://www.cs.auckland.ac.nz/courses/compsci709s2c/resources/Mike.d/astarNilsson.pdf)
     2. sipp - algorithm [SIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875) (discrete version for 4-connected grid)
-    3. weighted_sipp - suboptimal version of SIPP algorithm described [here](https://docs.google.com/document/d/16NjWHubNFczPDGi3QqWkMrWE8ewQtOBXruUBaa9hQnw/edit)
-    4. focal_search - focal search algorithm, as in original ECBS [paper](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875). Secondary heuristic is defined as number of vertex conflicts on the partial path to the current vertex
-    5. scipp - [SCIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS19/paper/viewFile/18327/17443) algoritm (discrete version for 4-connected grid)
-- agents_file - common prefix for the input files with agents’ description
-- tasks_count - number of input files with agents’ description: in testing files with names of the form `agents_file-n.xml` are used for all `n` from 1 to tasks_count. Optional parameter, default value is 1
-- agents_range - `min` and `max` attributes specify minimal and maximal number of agents for testing. When single_execution=`false`, number of agents is  gradually increased from `min` to `max` and the algorithm is being run on corresponding subset of agent set. If algorithm fails to find the solution or runs longer then some fixed time limit, testing of current scenario terminates. Optional parameter, by default minimal number of agents is 1 and maximal is the same as number of agents in the agents file
-- maxtime - maximal running time of the algorihm in milliseconds. Optional parameter, default value is 1000
+        3. 2k_neigh - SIPP algorithm for [2<sup>k</sup> neighborhood grid](https://jair.org/index.php/jair/article/download/11383/26555/). Agents are moving with constant speed and time of transition through an edge equals to its length transformed to the integer number of timesteps according to the time_resolution parameter. Also if an agent partially covers a cell, its is considered fully blocked.
+    4. weighted_sipp - suboptimal version of SIPP algorithm described [here](https://docs.google.com/document/d/16NjWHubNFczPDGi3QqWkMrWE8ewQtOBXruUBaa9hQnw/edit)
+    5. focal_search - focal search algorithm, as in original ECBS [paper](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875). Secondary heuristic is defined as number of vertex conflicts on the partial path to the current vertex
+    6. scipp - [SCIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS19/paper/viewFile/18327/17443) algoritm (discrete version for 4-connected grid)
 - with_perfect_h - find the shortest paths from all cells to agents goal positions to compute perfect heuristic for A* method (`true` or `false`, considered for CBS and Prioritized planning algorithms). Optional parameter, default value is false
 - with_cat - use Conflict avodance table (`true` or `false`, considered for CBS and ECBS algorithms). Optional parameter, default value is false
 - with_card_conf - use cardinal conflicts (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
@@ -38,7 +35,11 @@ The main file contains two sections `map` and `options`:
 - with_matching_h - compute heuristic on vertices of constraint tree in CBS, based on maximal matching in cardinal conflicts graph. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps18a.pdf) as ICBS-h1, can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
 - with_disjoint_splitting - use disjoint splitting. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps19a.pdf), can be `true` or `false`, considered for CBS and ECBS algorithms. When using this option, with_card_conf option is set to `true`. Optional parameter, default value is false
 - focal_w - weight used in ECBS high level search and in Focal search and SCIPP low level searches for construction of the FOCAL list. Also f-values of optimal nodes in weighted_sipp algorithm are multiplied by this value. In any case it is garantied that cost of the found solution will not exceed the optimal cost more than in focal_w times. Optional parameter, default value is 1.0
-- gen_subopt_from_opt - generate suboptimal successors from optimal nodes in weighted_sipp alogrithm. Can be `true` or `false`, considered for low_level = `weighted_sipp`. Optional parameter, default value is false
+- gen_subopt_from_opt - generate suboptimal successors from optimal nodes in weighted_sipp alogrithm. Can be `true` or `false`, considered for low_level = `weighted_sipp`. Optional parameter, default value is `false`
+
+- neigh_degree - connectedness number for SIPP with 2<sup>k</sup> neighborhood grid (i.e. parameter k). Integer number, greater or equal to 2. Optional parameter, default value is 2
+
+- time_resolution - parameter, used to tansform length of the edges to the integer number of timesteps in SIPP with 2<sup>k</sup> neighborhood grid. Time of transition through an edge equals to the product of its length and time_resolution rounded down. For example, if time_resolution = 1000, transition to the closest orthogonal neighbour takes 1000 timesteps, and transition to the closest diagonal neighbour takes 1414 timesteps.
 
 - pp_order - specifies a method of agents priorities definition for Prioritized Planning. Can take following values:
     - 0 - agents are considered in the same order as in the input file
@@ -48,10 +49,18 @@ The main file contains two sections `map` and `options`:
     Optional parameter, default value is 0
 - parallelize_paths_1 - use path parallelization technique in Push and rotate algorithm (without this option only one agent is moving at every time step in the solution). Can be `true` or `false`, considered for Push and rotate algorithm. Optional parameter, default value is false
 - parallelize_paths_2 - use additional parallelization technique in Push and rotate algorithm (allows to increase parallelization ratio, but significantly slows algorihm down). Can be `true` or `false`, considered for Push and rotate algorithm. When using this option, option parallelize_paths_1 is set to `true`. Optional parameter, default value is false
+
+### Section `options` - definition of the testing parameters. Contains following tags:
+- agents_file - common prefix for the input files with agents’ description
+- tasks_count - number of input files with agents’ description: in testing files with names of the form `agents_file-n.xml` are used for all `n` from 1 to tasks_count. Optional parameter, default value is 1
+- agents_range - `min` and `max` attributes specify minimal and maximal number of agents for testing. When single_execution=`false`, number of agents is  gradually increased from `min` to `max` with the step agents_step and the algorithm is being run on corresponding subset of agent set. If algorithm fails to find the solution or runs longer then some fixed time limit, testing of current scenario terminates. Optional parameter, by default minimal number of agents is 1 and maximal is the same as number of agents in the agents file
+- agents_step - incrementation step of number of agents for testing. Optional parameter, default value is 1
+- maxtime - maximal running time of the algorihm in milliseconds. Optional parameter, default value is 1000
 - single_execution - can be `true` or `false`. If option is set to `true`, the algorithm will be executed only once for the first agents file with the number of agents equal to `max` attribute in agents_range option. Output file format will also be different (see "Output data" section). Optional parameter, default value is false
 - aggregated_results - save separate testing results for each agents file or aggregated results over all agents files. Optional parameter, default value is true
 - logpath - path to the directory, where log will be stored (optional parameter, by default log is stored to the same directory where the input file is located)
 - logfilename - name of the log file (optional parameter, by default name of the log file has the form `input_file_name_log.xml` where "input_file_name.xml" is a name of the main input file)
+
 
 ### Files with agents’ descriptions
 For each agent its own tag `agent` is provided with following attributes:

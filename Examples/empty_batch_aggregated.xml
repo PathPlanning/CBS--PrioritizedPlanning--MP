@@ -39,6 +39,7 @@
         <agents_file>empty-16-16-random</agents_file>
         <tasks_count>2</tasks_count>
         <agents_range min="1" max="16"/>
+        <agents_step>1</agents_step>
         <maxtime>1000</maxtime>
         <single_execution>false</single_execution>
         <aggregated_results>true</aggregated_results>

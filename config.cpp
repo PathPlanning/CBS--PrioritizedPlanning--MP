@@ -160,6 +160,11 @@ bool Config::getConfig(const char *FileName)
     getValueFromText(algorithm, CNS_TAG_NEIGH_DEG, "int", &neighDegree);
     getValueFromText(algorithm, CNS_TAG_TIME_RES, "int", &resolution);
 
+    if (neighDegree < 2) {
+        std::cout << "Error! The value of neighDegree paramter must be greater or equal to 2'" << std::endl;
+        return false;
+    }
+
     parallelizePaths1 = parallelizePaths1 || parallelizePaths2;
     storeConflicts = withFocalSearch || withBypassing || withMatchingHeuristic || withDisjointSplitting || withCardinalConflicts;
     withCardinalConflicts = withCardinalConflicts || withMatchingHeuristic || withDisjointSplitting;
