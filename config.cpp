@@ -106,8 +106,6 @@ bool Config::getConfig(const char *FileName)
         if (value == CNS_ST_ECBS) {
             withFocalSearch = true;
         }
-    } else if (value == CNS_ST_PR) {
-        searchType = CN_ST_PR;
     } else if (value == CNS_ST_PP) {
         searchType = CN_ST_PP;
     } else {
@@ -149,8 +147,6 @@ bool Config::getConfig(const char *FileName)
     getValueFromText(algorithm, CNS_TAG_WITH_CAT, "bool", &withCAT);
     getValueFromText(algorithm, CNS_TAG_WITH_PH, "bool", &withPerfectHeuristic);
     getValueFromText(algorithm, CNS_TAG_PP_ORDER, "int", &ppOrder);
-    getValueFromText(algorithm, CNS_TAG_PAR_PATHS_1, "bool", &parallelizePaths1);
-    getValueFromText(algorithm, CNS_TAG_PAR_PATHS_2, "bool", &parallelizePaths2);
     getValueFromText(algorithm, CNS_TAG_CARD_CONF, "bool", &withCardinalConflicts);
     getValueFromText(algorithm, CNS_TAG_BYPASSING, "bool", &withBypassing);
     getValueFromText(algorithm, CNS_TAG_WITH_MH, "bool", &withMatchingHeuristic);
@@ -159,13 +155,14 @@ bool Config::getConfig(const char *FileName)
     getValueFromText(algorithm, CNS_TAG_SFO, "bool", &genSuboptFromOpt);
     getValueFromText(algorithm, CNS_TAG_NEIGH_DEG, "int", &neighDegree);
     getValueFromText(algorithm, CNS_TAG_TIME_RES, "int", &resolution);
+    getValueFromText(algorithm, CNS_TAG_SCALE, "int", &scale);
+    getValueFromText(algorithm, CNS_TAG_AGENT_SIZE, "double", &agentSize);
 
     if (neighDegree < 2) {
         std::cout << "Error! The value of neighDegree paramter must be greater or equal to 2'" << std::endl;
         return false;
     }
 
-    parallelizePaths1 = parallelizePaths1 || parallelizePaths2;
     storeConflicts = withFocalSearch || withBypassing || withMatchingHeuristic || withDisjointSplitting || withCardinalConflicts;
     withCardinalConflicts = withCardinalConflicts || withMatchingHeuristic || withDisjointSplitting;
     return true;

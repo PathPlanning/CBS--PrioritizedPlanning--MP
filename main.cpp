@@ -11,18 +11,16 @@ int main(int argc, char* argv[])
     Mission mission(argv[1]);
 
     std::cout << argv[1] << std::endl;
-    std::cout << "Parsing the map from XML:" << std::endl;
+    std::cout << "Parsing configurations (algorithm, log) from XML:" << std::endl;
 
-    if(!mission.getMap()) {
-        std::cout << "Incorrect map! Program halted!" << std::endl;
-    }
-    else {
-        std::cout << "Map OK!" << std::endl << "Parsing configurations (algorithm, log) from XML:" <<std::endl;
-        if(!mission.getConfig())
-            std::cout << "Incorrect configurations! Program halted!" <<std::endl;
+    if(!mission.getConfig()) {
+        std::cout << "Incorrect configurations! Program halted!" << std::endl;
+    } else {
+        std::cout << "Configurations OK!" << std::endl << "Parsing the map from XML:" << std::endl;
+        if(!mission.getMap())
+            std::cout << "Incorrect map! Program halted!" << std::endl;
         else {
-            std::cout << "Configurations OK!" << std::endl << "Creating log channel:" <<std::endl;
-
+            std::cout << "Map OK!" << std::endl << "Creating log channel:" <<std::endl;
             if(!mission.createLog())
                 std::cout << "Log chanel has not been created! Program halted!" << std::endl;
             else {

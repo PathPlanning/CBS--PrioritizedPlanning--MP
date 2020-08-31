@@ -1,6 +1,6 @@
 # [Документация на русском](README-RU.md)
-# Push-and-Rotate--CBS--PrioritizedPlanning
-This project contains implementations of different algorithms designed for the multiagent pathfinding problem. Namely, following algorithms with some of their modifications are implemented: [Conflict based search](https://www.aaai.org/ocs/index.php/AAAI/AAAI12/paper/viewFile/5062/5239), [Enhanced conflict based search](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875), [Push and rotate](https://pdfs.semanticscholar.org/0a84/5fa6530f84b5df50d652a5e4eecc38d77681.pdf), [Prioritized planning](https://arxiv.org/pdf/1409.2399.pdf).
+# CBS--PrioritizedPlanning--MP
+This project contains implementations of different algorithms designed for the multiagent pathfinding problem. Namely, following algorithms with some of their modifications are implemented: [Conflict based search](https://www.aaai.org/ocs/index.php/AAAI/AAAI12/paper/viewFile/5062/5239), [Enhanced conflict based search](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875), [Prioritized planning](https://arxiv.org/pdf/1409.2399.pdf).
 
 ## Build and run
 
@@ -19,23 +19,22 @@ The main file contains two sections `map` and `options`:
 - algorithm - algorithm to be used. Can take following values:
     1. cbs - Conflict based search
     2. ecbs - Enhanced conflict based search. In the high level search secondary heuristic h3 from the [article](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875) is used. Low level search depends on the low_level option
-    3. push_and_rotate - Push and rotate
-    4. prioritized_planning - Prioritized planning
+    3. prioritized_planning - Prioritized planning
 - low_level - algorithm, applied in the low level search in CBS, ECBS and Prioritized planning algorithms. Can take following values:
     1. astar - algorithm [A*](https://www.cs.auckland.ac.nz/courses/compsci709s2c/resources/Mike.d/astarNilsson.pdf)
     2. sipp - algorithm [SIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875) (discrete version for 4-connected grid)
     3. 2k_neigh - SIPP algorithm for [2<sup>k</sup> neighborhood grid](https://jair.org/index.php/jair/article/download/11383/26555/). Agents are moving with constant speed and time of transition through an edge equals to its length transformed to the integer number of timesteps according to the time_resolution parameter. Also if an agent partially covers a cell, its is considered fully blocked.
-    4. weighted_sipp - suboptimal version of SIPP algorithm described [here](https://docs.google.com/document/d/16NjWHubNFczPDGi3QqWkMrWE8ewQtOBXruUBaa9hQnw/edit)
+    4. zero_scipp - suboptimal version of SIPP algorithm described [here](https://docs.google.com/document/d/16NjWHubNFczPDGi3QqWkMrWE8ewQtOBXruUBaa9hQnw/edit)
     5. focal_search - focal search algorithm, as in original ECBS [paper](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875). Secondary heuristic is defined as number of vertex conflicts on the partial path to the current vertex
     6. scipp - [SCIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS19/paper/viewFile/18327/17443) algoritm (discrete version for 4-connected grid)
-- with_perfect_h - find the shortest paths from all cells to agents goal positions to compute perfect heuristic for A* method (`true` or `false`, considered for CBS and Prioritized planning algorithms). Optional parameter, default value is false
+- with_perfect_h - find the shortest paths from all cells to agents goal positions to compute perfect heuristic for A* method (`true` or `false`, considered for CBS, ECBS and Prioritized planning algorithms). Optional parameter, default value is false
 - with_cat - use Conflict avodance table (`true` or `false`, considered for CBS and ECBS algorithms). Optional parameter, default value is false
 - with_card_conf - use cardinal conflicts (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
 - with_bypassing - use conflict bypassing (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
 - with_matching_h - compute heuristic on vertices of constraint tree in CBS, based on maximal matching in cardinal conflicts graph. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps18a.pdf) as ICBS-h1, can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
 - with_disjoint_splitting - use disjoint splitting. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps19a.pdf), can be `true` or `false`, considered for CBS and ECBS algorithms. When using this option, with_card_conf option is set to `true`. Optional parameter, default value is false
-- focal_w - weight used in ECBS high level search and in Focal search and SCIPP low level searches for construction of the FOCAL list. Also f-values of optimal nodes in weighted_sipp algorithm are multiplied by this value. In any case it is garantied that cost of the found solution will not exceed the optimal cost more than in focal_w times. Optional parameter, default value is 1.0
-- gen_subopt_from_opt - generate suboptimal successors from optimal nodes in weighted_sipp alogrithm. Can be `true` or `false`, considered for low_level = `weighted_sipp`. Optional parameter, default value is `false`
+- focal_w - weight used in ECBS high level search and in Focal search and SCIPP low level searches for construction of the FOCAL list. Also f-values of optimal nodes in zero_scipp algorithm are multiplied by this value. In any case it is garantied that cost of the found solution will not exceed the optimal cost more than in focal_w times. Optional parameter, default value is 1.0
+- gen_subopt_from_opt - generate suboptimal successors from optimal nodes in zero_scipp alogrithm. Can be `true` or `false`, considered for low_level = `zero_scipp`. Optional parameter, default value is `false`
 
 - neigh_degree - connectedness number for SIPP with 2<sup>k</sup> neighborhood grid (i.e. parameter k). Integer number, greater or equal to 2. Optional parameter, default value is 2
 
@@ -47,8 +46,6 @@ The main file contains two sections `map` and `options`:
     - 2 - agents are considered in decreasing order of manhattan distances from start to goal node
 
     Optional parameter, default value is 0
-- parallelize_paths_1 - use path parallelization technique in Push and rotate algorithm (without this option only one agent is moving at every time step in the solution). Can be `true` or `false`, considered for Push and rotate algorithm. Optional parameter, default value is false
-- parallelize_paths_2 - use additional parallelization technique in Push and rotate algorithm (allows to increase parallelization ratio, but significantly slows algorihm down). Can be `true` or `false`, considered for Push and rotate algorithm. When using this option, option parallelize_paths_1 is set to `true`. Optional parameter, default value is false
 
 ### Section `options` - definition of the testing parameters. Contains following tags:
 - agents_file - common prefix for the input files with agents’ description

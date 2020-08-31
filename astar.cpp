@@ -37,25 +37,30 @@ double Astar<NodeType>::metric(int x1, int y1, int x2, int y2) {
 }
 
 template<typename NodeType>
-void Astar<NodeType>::getPerfectHeuristic(const Map &map, const AgentSet &agentSet) {
-    std::unordered_set<int> visited;
+void Astar<NodeType>::getNeigboursWithoutChecks(const Map &map, const Node &cur,
+                                                ISearch<> &search, std::list<Node> &successors) {
+    search.findSuccessors(successors, cur, map);
+}
+
+template<typename NodeType>
+void Astar<NodeType>::getPerfectHeuristic(const Map &map, const AgentSet &agentSet, int prevAgentCount) {
     ISearch<> search(false);
-    for (int i = 0; i < agentSet.getAgentCount(); ++i) {
-        visited.clear();
+    for (int i = prevAgentCount; i < agentSet.getAgentCount(); ++i) {
+        SearchQueue<Node> queue;
+        std::unordered_set<int> visited;
         Node goal = Node(agentSet.getAgent(i).getGoal_i(), agentSet.getAgent(i).getGoal_j());
-        std::queue<Node> queue;
-        queue.push(goal);
+        queue.insert(map, goal, false);
         while (!queue.empty()) {
-            Node cur = queue.front();
-            queue.pop();
-            if (visited.find(cur.convolution(map.getMapWidth(), map.getMapHeight())) != visited.end()) {
-                continue;
-            }
-            perfectHeuristic[std::make_pair(cur, goal)] = cur.g;
+            Node cur = queue.getFront();
+            queue.erase(map, cur, false);
             visited.insert(cur.convolution(map.getMapWidth(), map.getMapHeight()));
-            std::list<Node> successors = search.findSuccessors(cur, map);
+            perfectHeuristic[std::make_pair(cur, goal)] = cur.g;
+            std::list<Node> successors;
+            getNeigboursWithoutChecks(map, cur, search, successors);
             for (auto neigh : successors) {
-                queue.push(neigh);
+                if (visited.find(neigh.convolution(map.getMapWidth(), map.getMapHeight())) == visited.end()) {
+                    queue.insert(map, neigh, false);
+                }
             }
         }
     }

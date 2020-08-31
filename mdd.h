@@ -31,20 +31,11 @@ MDD::MDD(const Map& map, const AgentSet& agentSet, SearchType* search, int agent
     std::vector<std::unordered_set<Node, NodeHash>> layers;
     layers.push_back({start});
 
-    int t = 0;
-    int q = 0;
-
     for (int i = 0; i < cost - 1; ++i) {
         layers.push_back({});
         for (auto node : layers[i]) {
-
-            std::chrono::steady_clock::time_point a = std::chrono::steady_clock::now();
-
-            std::list<Node> successors = astar.findSuccessors(node, map, goal.i, goal.j, agentId, {}, constraints);
-
-            std::chrono::steady_clock::time_point b = std::chrono::steady_clock::now();
-            q += std::chrono::duration_cast<std::chrono::microseconds>(b - a).count();
-            ++t;
+            std::list<Node> successors;
+            astar.findSuccessors(successors, node, map, goal.i, goal.j, agentId, constraints);
 
             for (auto neigh : successors) {
                 if (search->computeHFromCellToCell(neigh.i, neigh.j, goal.i, goal.j) <= cost - i - 1) {
@@ -54,16 +45,14 @@ MDD::MDD(const Map& map, const AgentSet& agentSet, SearchType* search, int agent
         }
     }
 
-    //std::cout << q << std::endl;
-    //std::cout << t << std::endl;
-
     layerSizes.resize(cost + 1, 0);
     layerSizes[cost] = 1;
     std::unordered_set<Node, NodeHash> lastLayer = {goal};
     for (int i = cost - 1; i >= 0; --i) {
         std::unordered_set<Node, NodeHash> newLastLayer;
         for (auto node : layers[i]) {
-            std::list<Node> successors = astar.findSuccessors(node, map, goal.i, goal.j, agentId, {}, constraints);
+            std::list<Node> successors;
+            astar.findSuccessors(successors, node, map, goal.i, goal.j, agentId, constraints);
             for (auto neigh : successors) {
                 if (lastLayer.find(neigh) != lastLayer.end()) {
                     newLastLayer.insert(node);

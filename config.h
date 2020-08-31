@@ -22,12 +22,11 @@ class Config
         std::string     agentsFile;
         int             tasksCount = 1;
         int             neighDegree = 2;
+        int             scale = 1;
         int             resolution = 1000;
         bool            withCAT = false;
         bool            withPerfectHeuristic = false;
         int             ppOrder = 0;
-        bool            parallelizePaths1 = false;
-        bool            parallelizePaths2 = false;
         bool            singleExecution = false;
         bool            withCardinalConflicts = false;
         bool            withBypassing = false;
@@ -39,6 +38,7 @@ class Config
         bool            saveAggregatedResults = true;
         int             agentsStep = 1;
         double          focalW = 1.0;
+        double          agentSize = 0.5;
 
     private:
         bool getValueFromText(tinyxml2::XMLElement *elem, const char *name, const char *typeName, void *field);

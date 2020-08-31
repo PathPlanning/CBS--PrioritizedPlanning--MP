@@ -42,7 +42,7 @@ class MPConflictBasedSearch : public ConflictBasedSearch<SearchType>
         void addBoundaries(std::map<std::pair<int, int>, std::set<IntervalBoundary>> &boundaries,
                            const std::vector<SIPPNode> &nodes, int curAgentId);
 
-        Primitives *mp;
+        // Primitives *mp;
 };
 
 template<typename SearchType>
@@ -114,8 +114,8 @@ void MPConflictBasedSearch<SearchType>::getConflicts(const Map &map, const Agent
                         ConstraintsSet agentConstraints = constraints.getAgentConstraints(id);
                         agentConstraints.addConstraint(constraint);
                         SearchResult searchResult = this->search->startSearch(map, agentSet, starts[id]->i, starts[id]->j,
-                                                                              std::prev(ends[id])->i, std::prev(ends[id])->j, nullptr, true,
-                                                                              true, 0, -1, -1, {}, agentConstraints);
+                                                                              std::prev(ends[id])->i, std::prev(ends[id])->j,
+                                                                              0, -1, -1, agentConstraints);
                         if (!searchResult.pathfound) {
                             continue;
                         }

@@ -30,13 +30,13 @@ Mission::~Mission()
 
 bool Mission::getMap()
 {
-    return map.getMap(mapFile);
+    return map.getMap(mapFile, config.scale);
 }
 
 bool Mission::getAgents(const char* agentsFile)
 {
     agentSet.clear();
-    return agentSet.readAgents(agentsFile);
+    return agentSet.readAgents(agentsFile, config.scale);
 }
 
 bool Mission::getConfig()
@@ -85,9 +85,7 @@ bool Mission::createLog()
 
 void Mission::createAlgorithm()
 {
-    if (config.searchType == CN_ST_PR) {
-        multiagentSearch = new PushAndRotate(new Astar<>(false));
-    } else if (config.searchType == CN_ST_CBS) {
+    if (config.searchType == CN_ST_CBS) {
         if (config.lowLevel == CN_SP_ST_ASTAR) {
             multiagentSearch = new ConflictBasedSearch<Astar<>>(new Astar<>(true));
         } else if (config.lowLevel == CN_SP_ST_SIPP) {
@@ -100,7 +98,9 @@ void Mission::createAlgorithm()
             multiagentSearch = new ConflictBasedSearch<SCIPP<>>(new SCIPP<>(config.focalW));
         } else if (config.lowLevel == CN_SP_ST_TKN) {
             multiagentSearch = new MPConflictBasedSearch<TwoKNeighSIPP<>>(new TwoKNeighSIPP<>(config.neighDegree,
-                                                                                              config.resolution));
+                                                                                              config.resolution,
+                                                                                              config.scale,
+                                                                                              config.agentSize));
         }
     } else if (config.searchType == CN_ST_PP) {
         if (config.lowLevel == CN_SP_ST_ASTAR) {
@@ -156,7 +156,7 @@ void Mission::startSearch(const std::string &agentsFile)
         AgentSet curAgentSet;
         for (int j = 0; j < i; ++j) {
             Agent agent = agentSet.getAgent(j);
-            curAgentSet.addAgent(agent.getCur_i(), agent.getCur_j(), agent.getGoal_i(), agent.getGoal_j());
+            curAgentSet.addAgent(agent.getStart_i(), agent.getStart_j(), agent.getGoal_i(), agent.getGoal_j());
         }
 
         multiagentSearch->clear();

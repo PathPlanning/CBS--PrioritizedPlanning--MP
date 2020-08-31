@@ -32,7 +32,8 @@ class ConflictBasedSearch : public MultiagentSearchInterface
                 int agentId = -1, bool findAllConflicts = false,
                 bool withCardinalConflicts = false,
                 const std::vector<MDD> &mdds = std::vector<MDD>()) override;
-    protected:
+    Primitives *mp;
+protected:
         std::list<Node> getNewPath(const Map &map, const AgentSet &agentSet, const Agent &agent,
                                    const Constraint &constraint, const ConstraintsSet &constraints,
                                    const std::list<Node>::iterator pathStart,

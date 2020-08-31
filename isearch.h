@@ -27,19 +27,14 @@ class ISearch
         virtual ~ISearch(void);
         SearchResult startSearch(const Map &map, const AgentSet &agentSet,
                                  int start_i, int start_j, int goal_i = 0, int goal_j = 0,
-                                 bool (*isGoal)(const Node&, const Node&, const Map&, const AgentSet&) = nullptr,
-                                 bool freshStart = true, bool returnPath = true,
                                  int startTime = 0, int goalTime = -1, int maxTime = -1,
-                                 const std::unordered_set<Node, NodeHash> &occupiedNodes =
-                                       std::unordered_set<Node, NodeHash>(),
                                  const ConstraintsSet &constraints = ConstraintsSet(),
                                  bool withCAT = false, const ConflictAvoidanceTable &CAT = ConflictAvoidanceTable());
 
-        virtual std::list<NodeType> findSuccessors(const NodeType &curNode, const Map &map, int goal_i = 0, int goal_j = 0, int agentId = -1,
-                                               const std::unordered_set<Node, NodeHash> &occupiedNodes =
-                                                     std::unordered_set<Node, NodeHash>(),
-                                               const ConstraintsSet &constraints = ConstraintsSet(),
-                                               bool withCAT = false, const ConflictAvoidanceTable &CAT = ConflictAvoidanceTable());
+        virtual void findSuccessors(std::list<NodeType> &successors,
+                                                   const NodeType &curNode, const Map &map, int goal_i = 0, int goal_j = 0, int agentId = -1,
+                                                   const ConstraintsSet &constraints = ConstraintsSet(),
+                                                   bool withCAT = false, const ConflictAvoidanceTable &CAT = ConflictAvoidanceTable());
 
         //static int convolution(int i, int j, const Map &map, int time = 0, bool withTime = false);
 
@@ -48,7 +43,7 @@ class ISearch
         // void getPerfectHeuristic(const Map &map, const AgentSet &agentSet);
         virtual double computeHFromCellToCell(int start_i, int start_j, int fin_i, int fin_j) {return 0;}
 
-        static int T;
+        static long long T;
 
     protected:
         //CODE HERE

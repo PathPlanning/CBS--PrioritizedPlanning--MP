@@ -8,7 +8,6 @@ set(SOURCE_FILES
         conflict_based_search.cpp
         constraints_set.cpp
         prioritized_planning.cpp
-        push_and_rotate.cpp
         tinyxml2.cpp
         xmllogger.cpp
         isearch.cpp
@@ -30,7 +29,6 @@ set(SOURCE_FILES
         constraints_set.h
         multiagent_search_result.h
         prioritized_planning.h
-        push_and_rotate.h
         tinyxml2.h
         node.h
         gl_const.h

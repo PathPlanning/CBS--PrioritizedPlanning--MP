@@ -79,9 +79,9 @@ MultiagentSearchResult PrioritizedPlanning<SearchType>::startSearch(const Map &m
 
         Agent agent = agentSet.getAgent(i);
         SearchResult searchResult = search->startSearch(map, agentSet, agent.getStart_i(), agent.getStart_j(),
-                                                        agent.getGoal_i(), agent.getGoal_j(), nullptr,
-                                                        true, true, 0, -1, maxDepth + map.getEmptyCellCount(),
-                                                        {}, constraints, false, CAT);
+                                                        agent.getGoal_i(), agent.getGoal_j(),
+                                                        0, -1, maxDepth + map.getEmptyCellCount(),
+                                                        constraints, false, CAT);
 
         if (!searchResult.pathfound) {
             return result;

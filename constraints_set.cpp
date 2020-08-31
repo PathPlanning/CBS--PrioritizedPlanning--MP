@@ -68,6 +68,14 @@ ConstraintsSet ConstraintsSet::getAgentConstraints(int agentId) const {
     return res;
 }
 
+bool ConstraintsSet::hasConstraint(int i, int j, int agentId) const {
+    auto it = nodeConstraints.lower_bound(Constraint(i, j, 0, agentId));
+    if (it != nodeConstraints.end() && it->i == i && it->j == j) {
+        return true;
+    }
+    return false;
+}
+
 bool ConstraintsSet::hasNodeConstraint(int i, int j, int time, int agentId) const {
     if (nodeConstraints.find(Constraint(i, j, time, agentId)) != nodeConstraints.end()) {
         return true;

@@ -28,6 +28,7 @@ public:
     std::vector<std::pair<int, int>> getSafeIntervals(int i, int j, int agentId,
                                                       int startTime, int endTime, int duration = 1) const;
 
+    bool hasConstraint(int i, int j, int agentId) const;
     bool hasNodeConstraint(int i, int j, int time, int agentId) const;
     bool hasFutureConstraint(int i, int j, int time, int agentId) const;
     bool hasEdgeConstraint(int i, int j, int time, int agentId, int prevI, int prevJ) const;

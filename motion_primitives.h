@@ -194,6 +194,8 @@ public:
     void countIntervals(double size, int time_resolution)
     {
         double r = size + agentSize;
+
+        std::vector<Cell> newCells;
         for(auto &c:cells)
         {
             double start = getEndpoint(c, 0, duration, 0.01, size, true);
@@ -203,8 +205,11 @@ public:
             c.interval.second = doubleToInt(getEndpoint(c, start + CN_RESOLUTION*2,
                                                         duration, 0.01, size, false), time_resolution);
             if(c.interval.first > c.interval.second)
-                c.interval.first = -1;
+                continue;
+
+            newCells.push_back(c);
         }
+        cells = newCells;
     }
     void countCells()
     {
@@ -360,28 +365,33 @@ class Primitives
                 if(t.id == id)
                     return t;
     }
-    std::vector<Primitive> getPrimitives(int i, int j, int angle_id, int speed, const Map& map)
+    void getPrimitives(std::vector<Primitive> &prims, int i, int j, int angle_id, int speed, const Map& map)
     {
-        std::vector<Primitive> prims, res;
-        if(speed == 1)
+        /*if(speed == 1)
             prims = type1[angle_id];
         else
-            prims = type0[angle_id];
-        for(int k = 0; k < prims.size(); k++)
-            for(auto c:prims[k].getCells())
-                if(c.interval.first > -CN_EPSILON)
-                if(!map.CellOnGrid(i+c.i,j+c.j) || map.CellIsObstacle(i+c.i, j+c.j))
-                {
-                    prims.erase(prims.begin() + k);
-                    k--;
-                    break;
+            prims = type0[angle_id];*/
+        for(int k = 0; k < type1[angle_id].size(); k++) {
+            if (map.CellOnGrid(i + type1[angle_id][k].target.i, j + type1[angle_id][k].target.j)) {
+                bool good = true;
+                for(auto c : type1[angle_id][k].getCells()) {
+                    if(c.interval.first > -CN_EPSILON) {
+                        if (map.CellIsObstacle(i+c.i, j+c.j)) {
+                            good = false;
+                            break;
+                        }
+                    }
                 }
-        return prims;
+                if (good) {
+                    prims.push_back(type1[angle_id][k]);
+                }
+            }
+        }
     }
 
-    void makeTwoKNeigh(int k, int Time_resolution) {
+    void makeTwoKNeigh(int k, int Time_resolution, int scale, double agentSize) {
         time_resolution = Time_resolution;
-        std::vector<std::pair<int, int>> quad = {{1, 0}, {0, 1}};
+        std::vector<std::pair<int, int>> quad = {{scale, 0}, {0, scale}};
 
         for (int i = 2; i < k; ++i) {
             std::vector<std::pair<int, int>> newQuad;
@@ -410,9 +420,9 @@ class Primitives
             prim.id = type1[0].size();
             prim.type = 1;
 
-            prim.duration = sqrt(pair.first * pair.first + pair.second * pair.second);
+            prim.duration = sqrt(pair.first * pair.first + pair.second * pair.second) / scale;
             prim.intDuration = prim.doubleToInt(prim.duration, time_resolution);
-            prim.agentSize = CN_SQRT_TWO / 4;
+            prim.agentSize = agentSize * scale;
 
             prim.source.i = 0;
             prim.source.j = 0;

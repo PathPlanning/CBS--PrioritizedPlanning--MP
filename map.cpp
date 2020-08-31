@@ -18,9 +18,9 @@ Map::~Map()
     }
 }
 
-bool Map::CellIsTraversable(int i, int j, const std::unordered_set<Node, NodeHash> &occupiedNodes) const
+bool Map::CellIsTraversable(int i, int j) const
 {
-    return (Grid[i][j] == CN_GC_NOOBS) && occupiedNodes.find(Node(i, j)) == occupiedNodes.end();
+    return Grid[i][j] == CN_GC_NOOBS;
 }
 
 bool Map::CellIsObstacle(int i, int j) const
@@ -33,7 +33,7 @@ bool Map::CellOnGrid(int i, int j) const
     return (i < height && i >= 0 && j < width && j >= 0);
 }
 
-bool Map::getMap(const char *FileName)
+bool Map::getMap(const char *FileName, int scale)
 {
     int rowiter = 0, grid_i = 0, grid_j = 0;
     emptyCellCount = 0;
@@ -98,9 +98,9 @@ bool Map::getMap(const char *FileName)
                 return false;
             }
 
-            Grid = new int *[height];
-            for (int i = 0; i < height; ++i)
-                Grid[i] = new int[width];
+            Grid = new int *[height * scale];
+            for (int i = 0; i < height * scale; ++i)
+                Grid[i] = new int[width * scale];
 
             element = mapnode->FirstChildElement();
             while (grid_i < height) {
@@ -128,7 +128,13 @@ bool Map::getMap(const char *FileName)
                         stream.clear();
                         stream << elems[grid_j];
                         stream >> val;
-                        Grid[grid_i][grid_j] = val;
+
+                        for (int i = 0; i < scale; ++i) {
+                            for (int j = 0; j < scale; ++j) {
+                                Grid[grid_i * scale + i][grid_j * scale + j] = val;
+                            }
+                        }
+
                         if (val == CN_GC_NOOBS) {
                             ++emptyCellCount;
                         }
@@ -143,6 +149,8 @@ bool Map::getMap(const char *FileName)
 
                 element = element->NextSiblingElement();
             }
+            height *= scale;
+            width *= scale;
         }
     }
     //some additional checks

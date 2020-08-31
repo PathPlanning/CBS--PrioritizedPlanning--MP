@@ -21,24 +21,9 @@ int Agent::getGoal_j() const
     return goal_j;
 }
 
-int Agent::getCur_i() const
-{
-    return cur_i;
-}
-
-int Agent::getCur_j() const
-{
-    return cur_j;
-}
-
-
 int Agent::getId() const
 {
     return id;
-}
-
-int Agent::getSubgraph() const {
-    return subgraph;
 }
 
 Node Agent::getStartPosition() const {
@@ -47,19 +32,6 @@ Node Agent::getStartPosition() const {
 
 Node Agent::getGoalPosition() const {
     return Node(goal_i, goal_j);
-}
-
-Node Agent::getCurPosition() const {
-    return Node(cur_i, cur_j);
-}
-
-void Agent::setCurPosition(int i, int j) {
-    cur_i = i;
-    cur_j = j;
-}
-
-void Agent::setSubgraph(int Subgraph) {
-    subgraph = Subgraph;
 }
 
 

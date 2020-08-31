@@ -32,7 +32,6 @@ SOURCES += \
     mp_conflict_based_search.cpp \
     multiagent_search_interface.cpp \
     prioritized_planning.cpp \
-    push_and_rotate.cpp \
     scipp.cpp \
     search_queue.cpp \
     sipp.cpp \
@@ -67,7 +66,6 @@ HEADERS += \
     multiagent_search_inteface.h \
     multiagent_search_result.h \
     prioritized_planning.h \
-    push_and_rotate.h \
     scipp.h \
     scipp_node.h \
     search_queue.h \

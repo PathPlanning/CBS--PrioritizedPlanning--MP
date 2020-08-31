@@ -11,7 +11,7 @@ class Astar : public Dijkstra<NodeType>
         Astar(bool WithTime = false);
         virtual ~Astar() {}
         double computeHFromCellToCell(int i1, int j1, int i2, int j2) override;
-        void getPerfectHeuristic(const Map &map, const AgentSet &agentSet);
+        void getPerfectHeuristic(const Map &map, const AgentSet &agentSet, int prevAgentCount = 0);
 
     protected:
         double euclideanDistance(int x1, int y1, int x2, int y2);
@@ -19,6 +19,7 @@ class Astar : public Dijkstra<NodeType>
         double chebyshevDistance(int x1, int y1, int x2, int y2);
         double diagonalDistance(int x1, int y1, int x2, int y2);
         double metric(int x1, int y1, int x2, int y2);
+        virtual void getNeigboursWithoutChecks(const Map &map, const Node &cur, ISearch<> &search, std::list<Node> &successors);
 
         std::unordered_map<std::pair<Node, Node>, int, NodePairHash> perfectHeuristic;
         int htype;

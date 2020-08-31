@@ -64,8 +64,8 @@ std::list<Node> ConflictBasedSearch<SearchType>::getNewPath(const Map &map, cons
         startTime = positiveConstraints[i - 1].time;
     }
 
-    SearchResult searchResult = search->startSearch(map, agentSet, start.i, start.j, end.i, end.j, nullptr,
-                                                    true, true, startTime, endTime, -1, {}, constraints, withCAT, CAT);
+    SearchResult searchResult = search->startSearch(map, agentSet, start.i, start.j, end.i, end.j,
+                                                    startTime, endTime, -1, constraints, withCAT, CAT);
 
     LLNodes.push_back(searchResult.nodescreated);
     LLExpansions.push_back(searchResult.nodesexpanded);
@@ -192,11 +192,17 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
     CBSNode::curId = 0;
     ISearch<>::T = 0;
 
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-
     if (config.withPerfectHeuristic) { //&& !(config.lowLevel == CN_SP_ST_TKN && config.neighDegree > 2)) {
-        search->getPerfectHeuristic(map, agentSet);
+        int prevAgentCount;
+        if (agentSet.getAgentCount() == config.minAgents) {
+            prevAgentCount = 0;
+        } else {
+            prevAgentCount = agentSet.getAgentCount() - config.agentsStep;
+        }
+        search->getPerfectHeuristic(map, agentSet, prevAgentCount);
     }
+
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
     auto focalCmp = [](const CBSNode &lhs, const CBSNode &rhs) {
         return lhs.hc < rhs.hc || lhs.hc == rhs.hc && lhs < rhs;
@@ -256,6 +262,7 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
 
     int t = 0;
     while (!open.empty() || !focal.empty()) {
+        //std::cout << ISearch<>::T << std::endl;
         ++t;
         std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - begin).count() > config.maxTime) {
@@ -397,7 +404,7 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
                 if (constraint.agentId == child.paths.begin()->first) {
                     for (auto it = child.paths.begin()->second.begin(); it != child.paths.begin()->second.end(); ++it) {
                         if (std::next(it) != child.paths.begin()->second.end()) {
-                            auto pr = this->mp.getPrimitive(std::next(it)->primitiveId);
+                            auto pr = this->mp->getPrimitive(std::next(it)->primitiveId);
                             for (auto cell : pr.cells) {
                                 if (it->i + cell.i == constraint.i && it->j + cell.j == constraint.j) {
                                     int start = std::next(it)->g - pr.intDuration + cell.interval.first;
@@ -481,7 +488,7 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
         }
     }
     //std::cout << close.size() + open.size() << std::endl;
-    //std::cout << ISearch<>::T << std::endl;
+    //std::cout << ISearch<TwoKNeighSIPPNode>::T << std::endl;
     return result;
 }
 

@@ -48,6 +48,8 @@
         #define CNS_TAG_SFO         "gen_subopt_from_opt"
         #define CNS_TAG_NEIGH_DEG   "neigh_degree"
         #define CNS_TAG_TIME_RES    "time_resolution"
+        #define CNS_TAG_SCALE       "scale"
+        #define CNS_TAG_AGENT_SIZE  "agent_size"
         #define CNS_TAG_AR          "aggregated_results"
         #define CNS_TAG_LOW_LEVEL   "low_level"
         #define CNS_TAG_PP_ORDER    "pp_order"
@@ -115,7 +117,6 @@
 
 //Search Parameters
     #define CNS_ST_CBS                  "cbs"
-    #define CNS_ST_PR                   "push_and_rotate"
     #define CNS_ST_PP                   "prioritized_planning"
     #define CNS_ST_ECBS                 "ecbs"
     #define CNS_ST_ECBS_CT              "ecbs-ct"

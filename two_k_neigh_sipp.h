@@ -9,12 +9,12 @@ template <typename NodeType = TwoKNeighSIPPNode>
 class TwoKNeighSIPP : public SIPP<NodeType>
 {
 public:
-    std::list<NodeType> findSuccessors(const NodeType &curNode, const Map &map,
-                                       int goal_i, int goal_j, int agentId,
-                                       const std::unordered_set<Node, NodeHash> &occupiedNodes,
-                                       const ConstraintsSet &constraints,
-                                       bool withCAT, const ConflictAvoidanceTable &CAT) override;
-    TwoKNeighSIPP(int k, int time_resolution);
+    void findSuccessors(std::list<NodeType> &successors,
+                        const NodeType &curNode, const Map &map,
+                        int goal_i, int goal_j, int agentId,
+                        const ConstraintsSet &constraints,
+                        bool withCAT, const ConflictAvoidanceTable &CAT) override;
+    TwoKNeighSIPP(int k, int time_resolution, int scale, double agentSize);
     virtual ~TwoKNeighSIPP() {}
     Primitives *getMP() { return &mp; };
 
@@ -26,6 +26,7 @@ private:
     int addWithInfCheck(const int lhs, const int rhs);
     void makePrimaryPath(Node &curNode, int endTime) override;
     void makeSecondaryPath(const Map &map) override {};
+    void getNeigboursWithoutChecks(const Map &map, const Node &cur, ISearch<> &search, std::list<Node> &successors) override;
 
     Primitives mp;
 

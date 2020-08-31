@@ -1,6 +1,6 @@
-# Push-and-Rotate--CBS--PrioritizedPlanning
+# CBS--PrioritizedPlanning--MP
 
-В данном проекте приводятся реализации различных алгоритмов решающих задачи планирования траекторий для группы агентов. Рассматриваются алгоритмы [Conflict based search](https://www.aaai.org/ocs/index.php/AAAI/AAAI12/paper/viewFile/5062/5239), [Enhanced conflict based search](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875), [Push and rotate](https://pdfs.semanticscholar.org/0a84/5fa6530f84b5df50d652a5e4eecc38d77681.pdf) и [Prioritized planning](https://arxiv.org/pdf/1409.2399.pdf), а также некоторые их модификации.
+В данном проекте приводятся реализации различных алгоритмов решающих задачи планирования траекторий для группы агентов. Рассматриваются алгоритмы [Conflict based search](https://www.aaai.org/ocs/index.php/AAAI/AAAI12/paper/viewFile/5062/5239), [Enhanced conflict based search](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875) и [Prioritized planning](https://arxiv.org/pdf/1409.2399.pdf), а также некоторые их модификации.
 
 ## Сборка и запуск
 Для сборки проекта можно использовать cmake с помощью файла CMakeLists.txt, размещенного в репозитории. Также файлы проекта могут быть открыты и скомпилированы в Qt Creator с конфигурациями, заданными в файле PathPlanning.pro.
@@ -17,8 +17,7 @@
 - planner - используемый алгоритм. Может принимать следующие значения:
     1. cbs - Conflict based search
     2. ecbs - Enhanced conflict based search. В алгоритме на верхнем уровне используется вторичная эвристика h3 из [статьи](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875). Поиск нижнего уровня зависит от параметра low_level.
-    3. push_and_rotate - Push and rotate
-    4. prioritized_planning - Prioritized planning
+    3. prioritized_planning - Prioritized planning
 - low_level - алгоритм, используемый в поиске нижнего уровня в алгоритмах CBS, ECBS и Prioritized planning. Может принимать следующие значения:
     1. astar - алгоритм [A*](https://www.cs.auckland.ac.nz/courses/compsci709s2c/resources/Mike.d/astarNilsson.pdf)
     2. sipp - алгоритм [SIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875) (дискретная версия для четырехсвязной сетки)
@@ -44,8 +43,6 @@
     - 2 - агенты обрабатываются в порядке уменьшения манхэттенского расстояния от стартовой позиции до конечной
 
     Опциональный параметр, значение по умолчанию равно 0
-- parallelize_paths_1 - требуется ли применять процедуру параллеллезации путей, построенных Push and rotate (без этой опции в каждый момент времени двигается только один агент). Принимает значения `true` или `false`, учитывается только для алгоритма Push and rotate. . Опциональный параметр, значение по умолчанию равно `false`
-- parallelize_paths_2 - требуется ли дополнительно параллелизовать пути, построенные Push and rotate (увеличивает коэффициент сжатия, но замедляет работу алгоритма). Принимает значения `true` или `false`, учитывается только для алгоритма Push and rotate. При использовании этой опции, опция parallelize_paths_1 фиксируется равной `true`. Опциональный параметр, значение по умолчанию равно `false`
 
 ### Раздел options - выбор параметров тестирования. Содержит следующие тэги:
 - agents_file - общий префикс названий входных файлов с описанием агентов
