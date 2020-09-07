@@ -87,30 +87,28 @@ void Mission::createAlgorithm()
 {
     if (config.searchType == CN_ST_CBS) {
         if (config.lowLevel == CN_SP_ST_ASTAR) {
-            multiagentSearch = new ConflictBasedSearch<Astar<>>(new Astar<>(true));
+            multiagentSearch = new ConflictBasedSearch<Astar<>>(new Astar<>(config.mp, true));
         } else if (config.lowLevel == CN_SP_ST_SIPP) {
-            multiagentSearch = new ConflictBasedSearch<SIPP<>>(new SIPP<>());
+            multiagentSearch = new ConflictBasedSearch<SIPP<>>(new SIPP<>(config.mp));
         } else if (config.lowLevel == CN_SP_ST_ZSCIPP) {
-            multiagentSearch = new ConflictBasedSearch<ZeroSCIPP<>>(new ZeroSCIPP<>(config.focalW, config.genSuboptFromOpt));
+            multiagentSearch = new ConflictBasedSearch<ZeroSCIPP<>>(new ZeroSCIPP<>(config.mp,
+                                                                                    config.focalW,
+                                                                                    config.genSuboptFromOpt));
         } else if (config.lowLevel == CN_SP_ST_FS) {
-            multiagentSearch = new ConflictBasedSearch<FocalSearch<>>(new FocalSearch<>(true, config.focalW));
+            multiagentSearch = new ConflictBasedSearch<FocalSearch<>>(new FocalSearch<>(config.mp,
+                                                                                        true, config.focalW));
         } else if (config.lowLevel == CN_SP_ST_SCIPP) {
-            multiagentSearch = new ConflictBasedSearch<SCIPP<>>(new SCIPP<>(config.focalW));
-        } else if (config.lowLevel == CN_SP_ST_TKN) {
-            multiagentSearch = new MPConflictBasedSearch<TwoKNeighSIPP<>>(new TwoKNeighSIPP<>(config.neighDegree,
-                                                                                              config.resolution,
-                                                                                              config.scale,
-                                                                                              config.agentSize));
+            multiagentSearch = new ConflictBasedSearch<SCIPP<>>(new SCIPP<>(config.mp, config.focalW));
         }
     } else if (config.searchType == CN_ST_PP) {
         if (config.lowLevel == CN_SP_ST_ASTAR) {
-            multiagentSearch = new PrioritizedPlanning<Astar<>>(new Astar<>(true));
+            multiagentSearch = new PrioritizedPlanning<Astar<>>(new Astar<>(config.mp, true));
         } else if (config.lowLevel == CN_SP_ST_SIPP) {
-            multiagentSearch = new PrioritizedPlanning<SIPP<>>(new SIPP<>());
+            multiagentSearch = new PrioritizedPlanning<SIPP<>>(new SIPP<>(config.mp));
         } else if (config.lowLevel == CN_SP_ST_SCIPP) {
-            multiagentSearch = new PrioritizedPlanning<SCIPP<>>(new SCIPP<>(config.focalW));
+            multiagentSearch = new PrioritizedPlanning<SCIPP<>>(new SCIPP<>(config.mp, config.focalW));
         } else if (config.lowLevel == CN_SP_ST_ZSCIPP) {
-            multiagentSearch = new PrioritizedPlanning<ZeroSCIPP<>>(new ZeroSCIPP<>(config.focalW, config.genSuboptFromOpt));
+            multiagentSearch = new PrioritizedPlanning<ZeroSCIPP<>>(new ZeroSCIPP<>(config.mp, config.focalW, config.genSuboptFromOpt));
         }
     }
 }
@@ -199,16 +197,9 @@ void Mission::startSearch(const std::string &agentsFile)
 std::pair<double, double> Mission::getCosts() {
     double makespan = 0, flowtime = 0;
     for (int i = 0; i < agentsPaths.size(); ++i) {
-        if (config.lowLevel == CN_SP_ST_TKN) {
-            double time = double(agentsPaths[i].back().g) / config.resolution;
-            makespan = std::max(makespan, time);
-            flowtime += time;
-        } else {
-            makespan = std::max(makespan, double(agentsPaths[i].size() - 1));
-            int lastMove;
-            for (lastMove = agentsPaths[i].size() - 1; lastMove > 1 && agentsPaths[i][lastMove] == agentsPaths[i][lastMove - 1]; --lastMove);
-            flowtime += lastMove;
-        }
+        double time = double(agentsPaths[i].back().g) / config.resolution;
+        makespan = std::max(makespan, time);
+        flowtime += time;
     }
     return std::make_pair(makespan, flowtime);
 }
@@ -245,12 +236,6 @@ bool Mission::checkCorrectness() {
             }
             if (map.CellIsObstacle(agentsPaths[j][i].i, agentsPaths[j][i].j)) {
                 std::cout << "Incorrect result: agent path goes through obstacle!" << std::endl;
-                return false;
-            }
-            if (i > 0 && config.lowLevel != CN_SP_ST_TKN &&
-                abs(agentsPaths[j][i].i - agentsPaths[j][i - 1].i) +
-                abs(agentsPaths[j][i].j - agentsPaths[j][i - 1].j) > 1) {
-                std::cout << "Incorrect result: consecutive nodes in agent path are not adjacent!" << std::endl;
                 return false;
             }
         }
@@ -321,7 +306,7 @@ void Mission::saveAgentsPathsToLog(const std::string &agentsFile, double time,
                                    int HLExpansions, int HLNodes,
                                    double LLExpansions, double LLNodes) {
     logger->writeToLogAgentsPaths(agentSet, agentsPaths, agentsFile, time, makespan, flowtime,
-                                  HLExpansions, HLNodes, LLExpansions, LLNodes);
+                                  HLExpansions, HLNodes, LLExpansions, LLNodes, config.scale);
     logger->saveLog();
 }
 

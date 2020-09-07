@@ -6,7 +6,6 @@
 #include <list>
 #include "node.h"
 #include "constraint.h"
-#include "mdd.h"
 #include "conflict_set.h"
 
 struct CBSNode
@@ -15,7 +14,6 @@ struct CBSNode
 
     Constraint                                  constraint, positiveConstraint;
     std::unordered_map<int, std::list<Node>>    paths;
-    std::unordered_map<int, MDD>                mdds;
     std::unordered_map<int, double>             lb;
     double                                      sumLb;
     int                                         hc;

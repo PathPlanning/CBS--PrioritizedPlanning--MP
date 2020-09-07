@@ -149,7 +149,7 @@ void XmlLogger::writeToLogAgentsPaths(const AgentSet& agentSet,
                                       const std::string &agentsFile, double time,
                                       double makespan, double flowtime,
                                       int HLExpansions, int HLNodes,
-                                      double LLExpansions, double LLNodes) {
+                                      double LLExpansions, double LLNodes, int scale) {
     XMLElement *log = doc.FirstChildElement(CNS_TAG_ROOT)->FirstChildElement(CNS_TAG_LOG);
 
     XMLElement *taskFileElement = doc.NewElement(CNS_TAG_TASKFN);
@@ -171,10 +171,10 @@ void XmlLogger::writeToLogAgentsPaths(const AgentSet& agentSet,
         Agent agent = agentSet.getAgent(i);
         XMLElement *agentElement = doc.NewElement(CNS_TAG_AGENT);
         agentElement->SetAttribute(CNS_TAG_ATTR_ID, i);
-        agentElement->SetAttribute(CNS_TAG_ATTR_STARTX, agent.getStart_j());
-        agentElement->SetAttribute(CNS_TAG_ATTR_STARTY, agent.getStart_i());
-        agentElement->SetAttribute(CNS_TAG_ATTR_GOALX, agent.getGoal_j());
-        agentElement->SetAttribute(CNS_TAG_ATTR_GOALY, agent.getGoal_i());
+        agentElement->SetAttribute(CNS_TAG_ATTR_STARTX, agent.getStart_j() / scale);
+        agentElement->SetAttribute(CNS_TAG_ATTR_STARTY, agent.getStart_i() / scale);
+        agentElement->SetAttribute(CNS_TAG_ATTR_GOALX, agent.getGoal_j() / scale);
+        agentElement->SetAttribute(CNS_TAG_ATTR_GOALY, agent.getGoal_i() / scale);
 
         XMLElement *pathElement = doc.NewElement(CNS_TAG_PATH);
         pathElement->SetAttribute(CNS_TAG_ATTR_PATH_FOUND, "true");
@@ -183,10 +183,10 @@ void XmlLogger::writeToLogAgentsPaths(const AgentSet& agentSet,
             XMLElement *sectionElement = doc.NewElement(CNS_TAG_SECTION);
             Node curNode = agentsPaths[i][j], nextNode = agentsPaths[i][j + 1];
             sectionElement->SetAttribute(CNS_TAG_ATTR_ID, j);
-            sectionElement->SetAttribute(CNS_TAG_ATTR_STARTX, curNode.j);
-            sectionElement->SetAttribute(CNS_TAG_ATTR_STARTY, curNode.i);
-            sectionElement->SetAttribute(CNS_TAG_ATTR_GOALX, nextNode.j);
-            sectionElement->SetAttribute(CNS_TAG_ATTR_GOALY, nextNode.i);
+            sectionElement->SetAttribute(CNS_TAG_ATTR_STARTX, curNode.j / scale);
+            sectionElement->SetAttribute(CNS_TAG_ATTR_STARTY, curNode.i / scale);
+            sectionElement->SetAttribute(CNS_TAG_ATTR_GOALX, nextNode.j / scale);
+            sectionElement->SetAttribute(CNS_TAG_ATTR_GOALY, nextNode.i / scale);
             sectionElement->SetAttribute(CNS_TAG_ATTR_DUR, 1);
             pathElement->InsertEndChild(sectionElement);
         }

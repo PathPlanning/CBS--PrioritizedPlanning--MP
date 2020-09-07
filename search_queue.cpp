@@ -75,4 +75,3 @@ template class SearchQueue<SIPPNode>;
 template class SearchQueue<ZeroSCIPPNode>;
 template class SearchQueue<SCIPPNode>;
 template class SearchQueue<FSNode>;
-template class SearchQueue<TwoKNeighSIPPNode>;

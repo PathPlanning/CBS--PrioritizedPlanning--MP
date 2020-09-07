@@ -9,8 +9,8 @@ template <typename NodeType = SCIPPNode>
 class SCIPP : public SIPP<NodeType>, FocalSearch<NodeType>
 {
 public:
-    SCIPP(double FocalW = 1.0) :
-        Astar<NodeType>(true), SIPP<NodeType>(), FocalSearch<NodeType>(true, FocalW) {}
+    SCIPP(const Primitives &mp, double FocalW = 1.0) :
+        Astar<NodeType>(mp, true), SIPP<NodeType>(mp), FocalSearch<NodeType>(mp, true, FocalW) {}
     virtual ~SCIPP();
 
 protected:

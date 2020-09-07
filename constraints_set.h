@@ -12,14 +12,12 @@ class ConstraintsSet
 public:
     void addNodeConstraint(int i, int j, int time, int agentId);
     void addGoalNodeConstraint(int i, int j, int time, int agentId);
-    void addEdgeConstraint(int i, int j, int time, int agentId, int prevI, int prevJ);
     void addPositiveConstraint(int i, int j, int time, int agentId, int prevI = -1, int prevJ = -1);
     void addConstraint(Constraint &constraint);
     template<typename Iter> void addAgentPath(Iter start, Iter end, int agentId);
 
     void removeNodeConstraint(int i, int j, int time, int agentId);
     void removeGoalNodeConstraint(int i, int j, int time, int agentId);
-    void removeEdgeConstraint(int i, int j, int time, int agentId, int prevI, int prevJ);
     template<typename Iter> void removeAgentPath(Iter start, Iter end, int agentId);
 
     ConstraintsSet getAgentConstraints(int agentId) const;
@@ -29,12 +27,10 @@ public:
                                                       int startTime, int endTime, int duration = 1) const;
 
     bool hasConstraint(int i, int j, int agentId) const;
-    bool hasNodeConstraint(int i, int j, int time, int agentId) const;
+    bool hasNodeConstraint(int i, int j, int time, int agentId, int duration = 1) const;
     bool hasFutureConstraint(int i, int j, int time, int agentId) const;
-    bool hasEdgeConstraint(int i, int j, int time, int agentId, int prevI, int prevJ) const;
 //private:
     std::set<Constraint> nodeConstraints;
-    std::set<Constraint> edgeConstraints;
     std::set<Constraint> goalNodeConstraints;
     std::vector<Constraint> positiveConstraints;
 };

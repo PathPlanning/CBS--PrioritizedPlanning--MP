@@ -8,7 +8,7 @@ template <typename NodeType = FSNode>
 class FocalSearch : virtual public Astar<NodeType>
 {
 public:
-    FocalSearch(bool WithTime = false, double FocalW = 1.0);
+    FocalSearch(const Primitives &MP, bool WithTime = false, double FocalW = 1.0);
     virtual ~FocalSearch() {}
 protected:
     bool checkOpenEmpty() override;

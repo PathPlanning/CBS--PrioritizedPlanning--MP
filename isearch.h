@@ -7,7 +7,7 @@
 #include "conflict_avoidance_table.h"
 #include "search_queue.h"
 #include "zero_scipp_node.h"
-#include "two_k_neigh_sipp_node.h"
+#include "motion_primitives.h"
 #include <list>
 #include <vector>
 #include <math.h>
@@ -23,7 +23,7 @@ template <typename NodeType = Node>
 class ISearch
 {
     public:
-        ISearch(bool WithTime = false);
+        ISearch(const Primitives &mp, bool WithTime = false);
         virtual ~ISearch(void);
         SearchResult startSearch(const Map &map, const AgentSet &agentSet,
                                  int start_i, int start_j, int goal_i = 0, int goal_j = 0,
@@ -36,13 +36,12 @@ class ISearch
                                                    const ConstraintsSet &constraints = ConstraintsSet(),
                                                    bool withCAT = false, const ConflictAvoidanceTable &CAT = ConflictAvoidanceTable());
 
-        //static int convolution(int i, int j, const Map &map, int time = 0, bool withTime = false);
-
         std::unordered_map<std::pair<NodeType, NodeType>, int, NodePairHash> getPerfectHeuristic(const Map &map, const AgentSet &agentSet);
-
+        Primitives *getMP() { return &this->mp; };
         // void getPerfectHeuristic(const Map &map, const AgentSet &agentSet);
         virtual double computeHFromCellToCell(int start_i, int start_j, int fin_i, int fin_j) {return 0;}
 
+        Primitives mp;
         static long long T;
 
     protected:
@@ -73,7 +72,7 @@ class ISearch
                            const ConflictAvoidanceTable &CAT, bool isGoal) {}
         virtual void createSuccessorsFromNode(const NodeType &cur, NodeType &neigh, std::list<NodeType> &successors,
                                               int agentId, const ConstraintsSet &constraints,
-                                              const ConflictAvoidanceTable &CAT, bool isGoal);
+                                              const ConflictAvoidanceTable &CAT, bool isGoal, Primitive &pr);
         virtual bool checkGoal(const NodeType &cur, int goalTime, int agentId, const ConstraintsSet &constraints);
         virtual void addStartNode(NodeType &node, const Map &map, const ConflictAvoidanceTable &CAT);
         virtual void addSuboptimalNode(NodeType &node, const Map &map, const ConflictAvoidanceTable &CAT) {}

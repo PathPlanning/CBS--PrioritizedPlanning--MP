@@ -17,43 +17,96 @@ void SIPP<NodeType>::updateEndTimeBySoftConflicts(NodeType &node, const Conflict
 }
 
 template<typename NodeType>
-void SIPP<NodeType>::createSuccessorsFromNode(const NodeType &cur, NodeType &neigh, std::list<NodeType> &successors,
-                                    int agentId, const ConstraintsSet &constraints,
-                                    const ConflictAvoidanceTable &CAT, bool isGoal) {
-    std::vector<std::pair<int, int>> safeIntervals = constraints.getSafeIntervals(
-                neigh.i, neigh.j, agentId, cur.g + 1,
-                cur.endTime + (cur.endTime != CN_INFINITY));
-
-    for (auto interval : safeIntervals) {
-        addOptimalNode(cur, neigh, interval, agentId, constraints, successors);
-        setOptimal(neigh, false);
-        std::vector<std::pair<int, int>> softConflictIntervals;
-        splitBySoftConflicts(softConflictIntervals, neigh, cur, interval, CAT);
-        if (checkSuboptimal(cur)) {
-            for (int i = 0; i < softConflictIntervals.size(); ++i) { 
-                if (!withZeroConflicts() || (softConflictIntervals[i].second == 0 &&
-                                             (!isGoal || i == softConflictIntervals.size() - 1))) {
-                    neigh.startTime = softConflictIntervals[i].first;
-                    neigh.endTime = (i == softConflictIntervals.size() - 1) ? interval.second : softConflictIntervals[i + 1].first - 1;
-                    neigh.conflictsCount = softConflictIntervals[i].second;
-                    setNeighG(cur, neigh, agentId, constraints);
-                    this->setHC(neigh, cur, CAT, isGoal);
-                    if (neigh.g <= cur.endTime + 1 && neigh.g <= neigh.endTime) {
-                        neigh.F = neigh.g + neigh.H;
-                        successors.push_back(neigh);
-                    }
-                }
-            }
-        }
+void SIPP<NodeType>::getCellSafeIntervals(const Cell &cell,
+                                          int startTime, int endTime,
+                                          int agentId, const ConstraintsSet &constraints,
+                                          std::vector<std::pair<int, int>> &safeIntervals) {
+    int start = cell.interval.first;
+    int end = cell.interval.second;
+    if (endTime != CN_INFINITY) {
+        endTime += start;
+    }
+    safeIntervals = constraints.getSafeIntervals(cell.i, cell.j, agentId, startTime + start,
+                                                 endTime, end - start + 1);
+    int lastNeg = -1;
+    for (int i = 0; i < safeIntervals.size(); ++i) {
+        safeIntervals[i].first -= (startTime + start);
+        safeIntervals[i].second = addWithInfCheck(safeIntervals[i].second, -(startTime + start));
     }
 }
 
 template<typename NodeType>
-void SIPP<NodeType>::setNeighG(const NodeType &cur, NodeType &neigh,
-                               int agentId, const ConstraintsSet &constraints) {
-    for (neigh.g = std::max(neigh.startTime, cur.g + 1); neigh.g <= neigh.endTime; ++neigh.g) {
-        if (!constraints.hasEdgeConstraint(neigh.i, neigh.j, neigh.g, agentId, cur.i, cur.j)) {
-            break;
+int SIPP<NodeType>::addWithInfCheck(const int lhs, const int rhs) {
+    if (lhs == CN_INFINITY) {
+        return lhs;
+    }
+    return lhs + rhs;
+}
+
+template<typename NodeType>
+void SIPP<NodeType>::createSuccessorsFromNode(const NodeType &cur, NodeType &neigh, std::list<NodeType> &successors,
+                                    int agentId, const ConstraintsSet &constraints,
+                                    const ConflictAvoidanceTable &CAT, bool isGoal, Primitive &pr) {
+    auto cells = pr.getCells();
+    cells.back().interval.second = pr.intDuration;
+    std::vector<std::pair<int, int>> safeIntervals;
+    getCellSafeIntervals(cells.back(), cur.g, cur.endTime, agentId, constraints, safeIntervals);
+    int newg = neigh.g;
+
+    for (auto interval : safeIntervals) {
+        int waitTime = std::max(interval.first, 0);
+        neigh.startTime = interval.first + cur.g + cells.back().interval.first;
+        neigh.endTime = addWithInfCheck(interval.second, cur.g + pr.intDuration);
+
+        std::vector<IntervalBoundary> events;
+        int safeCellsCount = 0;
+        for (int i = 0; i < cells.size() - 1; ++i) {
+            if (!constraints.hasConstraint(cells[i].i, cells[i].j, agentId)) {
+                ++safeCellsCount;
+                continue;
+            }
+
+            std::vector<std::pair<int, int>> cellSafeIntervals;
+            getCellSafeIntervals(cells[i], cur.g + waitTime, addWithInfCheck(interval.second, cur.g),
+                                 agentId, constraints, cellSafeIntervals);
+
+            for (auto cellInterval : cellSafeIntervals) {
+                if (i > 0 || cellInterval.first + waitTime <= 0) {
+                    events.push_back(IntervalBoundary(cellInterval.first + waitTime, i, false));
+                    events.push_back(IntervalBoundary(addWithInfCheck(cellInterval.second, waitTime), i, true));
+                }
+            }
+        }
+
+        if (events.empty() && safeCellsCount == cells.size() - 1) {
+            neigh.g = newg + waitTime;
+            neigh.F = neigh.H + neigh.g;
+            successors.push_back(neigh);
+            continue;
+        }
+
+        std::sort(events.begin(), events.end());
+        int beg;
+        int i = 0;
+        while (i < events.size()) {
+            int curTime = events[i].time;
+            for (i; i < events.size() && events[i].time == curTime && events[i].end == false; ++i) {
+                ++safeCellsCount;
+                if (safeCellsCount == cells.size() - 1) {
+                    beg = curTime;
+                }
+            }
+
+            for (i; i < events.size() && events[i].time == curTime; ++i) {
+                if (safeCellsCount == cells.size() - 1) {
+                    neigh.startTime = interval.first + cur.g + cells.back().interval.first;
+                    neigh.endTime = addWithInfCheck(interval.second, cur.g + pr.intDuration);
+                    neigh.g = newg + std::max(beg, waitTime);
+                    neigh.F = neigh.H + neigh.g;
+                    successors.push_back(neigh);
+                }
+                --safeCellsCount;
+            }
         }
     }
 }
@@ -73,4 +126,3 @@ bool SIPP<NodeType>::checkGoal(const NodeType &cur, int goalTime, int agentId, c
 template class SIPP<SIPPNode>;
 template class SIPP<ZeroSCIPPNode>;
 template class SIPP<SCIPPNode>;
-template class SIPP<TwoKNeighSIPPNode>;

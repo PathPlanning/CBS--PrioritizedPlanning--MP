@@ -25,7 +25,7 @@ MultiagentSearchResult PrioritizedPlanning<SearchType>::startSearch(const Map &m
     // std::cout << agentSet.getAgentCount() << std::endl;
 
     if (config.withPerfectHeuristic) {
-        search->getPerfectHeuristic(map, agentSet);
+        search->getPerfectHeuristic(map, agentSet, *search->getMP());
     }
 
     std::vector<int> order;
@@ -49,8 +49,9 @@ MultiagentSearchResult PrioritizedPlanning<SearchType>::startSearch(const Map &m
 
     ConflictAvoidanceTable CAT;
     std::vector<std::list<Node>> individualPaths;
+    auto primitives = *search->getMP();
+    Astar<> astar(primitives, false);
     if (config.lowLevel == CN_SP_ST_SCIPP || config.lowLevel == CN_SP_ST_ZSCIPP) {
-        Astar<> astar(false);
         for (int i = 0; i < agentSet.getAgentCount(); ++i) {
             Agent agent = agentSet.getAgent(i);
             SearchResult sr = astar.startSearch(map, agentSet, agent.getStart_i(), agent.getStart_j(),
@@ -100,9 +101,9 @@ MultiagentSearchResult PrioritizedPlanning<SearchType>::startSearch(const Map &m
             } else {
                 constraints.addNodeConstraint(it->i, it->j, it->g, i);
             }
-            if (it != path.begin()) {
+            /*if (it != path.begin()) {
                 constraints.addEdgeConstraint(std::prev(it)->i, std::prev(it)->j, it->g, i, it->i, it->j);
-            }
+            }*/
         }
     }
 

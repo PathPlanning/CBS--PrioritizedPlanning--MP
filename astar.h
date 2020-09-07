@@ -8,10 +8,10 @@ template <typename NodeType = Node>
 class Astar : public Dijkstra<NodeType>
 {
     public:
-        Astar(bool WithTime = false);
+        Astar(const Primitives &mp, bool withTime = true) : Dijkstra<NodeType>(mp, withTime), htype(CN_SP_MT_MANH) {}
         virtual ~Astar() {}
         double computeHFromCellToCell(int i1, int j1, int i2, int j2) override;
-        void getPerfectHeuristic(const Map &map, const AgentSet &agentSet, int prevAgentCount = 0);
+        void getPerfectHeuristic(const Map &map, const AgentSet &agentSet, Primitives &mp, int prevAgentCount = 0);
 
     protected:
         double euclideanDistance(int x1, int y1, int x2, int y2);

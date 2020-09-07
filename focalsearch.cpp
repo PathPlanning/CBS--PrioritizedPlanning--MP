@@ -1,8 +1,8 @@
 #include "focalsearch.h"
 
 template<typename NodeType>
-FocalSearch<NodeType>::FocalSearch(bool WithTime, double FocalW) :
-    Astar<NodeType>(WithTime) {
+FocalSearch<NodeType>::FocalSearch(const Primitives &MP, bool WithTime, double FocalW) :
+    Astar<NodeType>(MP, WithTime) {
     auto focalCmp = [](const NodeType &lhs, const NodeType &rhs) {
         return lhs.hc < rhs.hc || lhs.hc == rhs.hc && lhs < rhs;
     };

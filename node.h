@@ -14,7 +14,8 @@ struct Node
 
     int primitiveId;
 
-    Node(int x = 0, int y = 0, Node *p = nullptr, int g_ = 0, double H_ = 0, int ConflictsCount = 0) {
+    Node(int x = 0, int y = 0, Node *p = nullptr, int g_ = 0, double H_ = 0,
+         int ConflictsCount = 0, int PrimitiveId = -1) {
         i = x;
         j = y;
         parent = p;
@@ -22,7 +23,7 @@ struct Node
         H = H_;
         F = g_ + H_;
         conflictsCount = ConflictsCount;
-        primitiveId = -1;
+        primitiveId = PrimitiveId;
     }
 
     bool operator== (const Node &other) const {

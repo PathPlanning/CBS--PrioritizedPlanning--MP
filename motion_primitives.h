@@ -354,6 +354,19 @@ class Primitives
             }
         }
     }
+
+    void addWaitPrimitive()
+    {
+        Primitive pr;
+        pr.intDuration = 1;
+        pr.target.i = 0;
+        pr.target.j = 0;
+        pr.id = type1[0].size();
+        pr.cells.push_back(Cell(0, 0));
+        pr.cells[0].interval = std::make_pair(0, 1);
+        type1[0].push_back(pr);
+    }
+
     Primitive getPrimitive(int id) const
     {
         for(auto p:type0)

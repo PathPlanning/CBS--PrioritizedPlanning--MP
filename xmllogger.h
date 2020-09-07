@@ -35,7 +35,7 @@ public:
                                const std::string &agentsFile, double time,
                                double makespan, double flowtime,
                                int HLExpansions, int HLNodes,
-                               double LLExpansions, double LLNodes);
+                               double LLExpansions, double LLNodes, int scale);
 
     void writeToLogNotFound();
 

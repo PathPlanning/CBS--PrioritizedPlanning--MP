@@ -4,7 +4,6 @@
 #include "map.h"
 #include "agent_set.h"
 #include "conflict_based_search.h"
-#include "mp_conflict_based_search.h"
 #include "prioritized_planning.h"
 #include "config.h"
 #include "isearch.h"

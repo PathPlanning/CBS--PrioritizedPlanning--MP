@@ -133,7 +133,6 @@
         #define CNS_SP_ST_SIPP          "sipp"
         #define CNS_SP_ST_ZSCIPP        "zero_scipp"
         #define CNS_SP_ST_SCIPP         "scipp"
-        #define CNS_SP_ST_TKN           "2k_neigh"
 
         #define CN_SP_ST_ASTAR          0
         #define CN_SP_ST_TIME_ASTAR     1
@@ -141,7 +140,6 @@
         #define CN_SP_ST_SIPP           3
         #define CN_SP_ST_ZSCIPP         4
         #define CN_SP_ST_SCIPP          5
-        #define CN_SP_ST_TKN            6
 
 
     #define CN_SP_AD 1 //AllowDiagonal

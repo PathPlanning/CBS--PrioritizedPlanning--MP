@@ -9,10 +9,6 @@ void ConstraintsSet::addGoalNodeConstraint(int i, int j, int time, int agentId) 
     goalNodeConstraints.insert(Constraint(i, j, time, agentId, -1, -1, true));
 }
 
-void ConstraintsSet::addEdgeConstraint(int i, int j, int time, int agentId, int prevI, int prevJ) {
-    edgeConstraints.insert(Constraint(i, j, time, agentId, prevI, prevJ));
-}
-
 void ConstraintsSet::addPositiveConstraint(int i, int j, int time, int agentId, int prevI, int prevJ) {
     positiveConstraints.push_back(Constraint(i, j, time, agentId, prevI, prevJ));
 }
@@ -26,8 +22,6 @@ void ConstraintsSet::addConstraint(Constraint &constraint) {
         } else {
             nodeConstraints.insert(constraint);
         }
-    } else {
-        edgeConstraints.insert(constraint);
     }
 }
 
@@ -39,20 +33,11 @@ void ConstraintsSet::removeGoalNodeConstraint(int i, int j, int time, int agentI
     goalNodeConstraints.erase(Constraint(i, j, time, agentId, -1, -1, true));
 }
 
-void ConstraintsSet::removeEdgeConstraint(int i, int j, int time, int agentId, int prevI, int prevJ) {
-    edgeConstraints.erase(Constraint(i, j, time, agentId, prevI, prevJ));
-}
-
 ConstraintsSet ConstraintsSet::getAgentConstraints(int agentId) const {
     ConstraintsSet res;
     for (auto constraint : nodeConstraints) {
         if (constraint.agentId == agentId) {
             res.nodeConstraints.insert(constraint);
-        }
-    }
-    for (auto constraint : edgeConstraints) {
-        if (constraint.agentId == agentId) {
-            res.edgeConstraints.insert(constraint);
         }
     }
     for (auto constraint : goalNodeConstraints) {
@@ -76,11 +61,12 @@ bool ConstraintsSet::hasConstraint(int i, int j, int agentId) const {
     return false;
 }
 
-bool ConstraintsSet::hasNodeConstraint(int i, int j, int time, int agentId) const {
-    if (nodeConstraints.find(Constraint(i, j, time, agentId)) != nodeConstraints.end()) {
+bool ConstraintsSet::hasNodeConstraint(int i, int j, int time, int agentId, int duration) const {
+    auto constraint = nodeConstraints.lower_bound(Constraint(i, j, time, agentId));
+    if (constraint != nodeConstraints.end() && constraint->i == i && constraint->j == j && constraint->time < time + duration) {
         return true;
     }
-    auto constraint = goalNodeConstraints.lower_bound(Constraint(i, j, 0));
+    constraint = goalNodeConstraints.lower_bound(Constraint(i, j, 0));
     return constraint != goalNodeConstraints.end() && constraint->i == i && constraint->j == j && constraint->time <= time;
 }
 
@@ -91,10 +77,6 @@ bool ConstraintsSet::hasFutureConstraint(int i, int j, int time, int agentId) co
     }
     constraint = goalNodeConstraints.lower_bound(Constraint(i, j, time));
     return constraint != goalNodeConstraints.end() && constraint->i == i && constraint->j == j;
-}
-
-bool ConstraintsSet::hasEdgeConstraint(int i, int j, int time, int agentId, int prevI, int prevJ) const {
-    return edgeConstraints.find(Constraint(i, j, time, agentId, prevI, prevJ)) != edgeConstraints.end();
 }
 
 std::vector<Constraint> ConstraintsSet::getPositiveConstraints() const {

@@ -5,8 +5,8 @@
 #include "agent_set.h"
 #include "map.h"
 #include "multiagent_search_result.h"
-#include "mdd.h"
 #include "conflict_set.h"
+#include "constraints_set.h"
 #include <vector>
 
 class MultiagentSearchInterface
@@ -21,8 +21,7 @@ public:
             const std::vector<std::list<Node>::iterator> &starts,
             const std::vector<std::list<Node>::iterator> &ends,
             int agentId = -1, bool findAllConflicts = false,
-            bool withCardinalConflicts = false,
-            const std::vector<MDD> &mdds = std::vector<MDD>()) { return ConflictSet(); };
+            bool withCardinalConflicts = false) { return ConflictSet(); };
     virtual void clear() {
         agentsPaths.clear();
     }

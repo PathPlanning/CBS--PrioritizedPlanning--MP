@@ -1,6 +1,6 @@
 # [Документация на русском](README-RU.md)
 # CBS--PrioritizedPlanning--MP
-This project contains implementations of different algorithms designed for the multiagent pathfinding problem. Namely, following algorithms with some of their modifications are implemented: [Conflict based search](https://www.aaai.org/ocs/index.php/AAAI/AAAI12/paper/viewFile/5062/5239), [Enhanced conflict based search](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875), [Prioritized planning](https://arxiv.org/pdf/1409.2399.pdf).
+This project contains implementations of different algorithms designed for the multiagent pathfinding problem. Namely, following algorithms with some of their modifications are implemented: [Conflict based search](https://www.aaai.org/ocs/index.php/AAAI/AAAI12/paper/viewFile/5062/5239), [Enhanced conflict based search](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875), [Prioritized planning](https://arxiv.org/pdf/1409.2399.pdf). In all algorithms the motion primitives model of agents movements is used.
 
 ## Build and run
 
@@ -23,10 +23,9 @@ The main file contains two sections `map` and `options`:
 - low_level - algorithm, applied in the low level search in CBS, ECBS and Prioritized planning algorithms. Can take following values:
     1. astar - algorithm [A*](https://www.cs.auckland.ac.nz/courses/compsci709s2c/resources/Mike.d/astarNilsson.pdf)
     2. sipp - algorithm [SIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875) (discrete version for 4-connected grid)
-    3. 2k_neigh - SIPP algorithm for [2<sup>k</sup> neighborhood grid](https://jair.org/index.php/jair/article/download/11383/26555/). Agents are moving with constant speed and time of transition through an edge equals to its length transformed to the integer number of timesteps according to the time_resolution parameter. Also if an agent partially covers a cell, its is considered fully blocked.
-    4. zero_scipp - suboptimal version of SIPP algorithm described [here](https://docs.google.com/document/d/16NjWHubNFczPDGi3QqWkMrWE8ewQtOBXruUBaa9hQnw/edit)
-    5. focal_search - focal search algorithm, as in original ECBS [paper](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875). Secondary heuristic is defined as number of vertex conflicts on the partial path to the current vertex
-    6. scipp - [SCIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS19/paper/viewFile/18327/17443) algoritm (discrete version for 4-connected grid)
+    3. zero_scipp - suboptimal version of SIPP algorithm described [here](https://docs.google.com/document/d/16NjWHubNFczPDGi3QqWkMrWE8ewQtOBXruUBaa9hQnw/edit)
+    4. focal_search - focal search algorithm, as in original ECBS [paper](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875). Secondary heuristic is defined as number of vertex conflicts on the partial path to the current vertex
+    5. scipp - [SCIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS19/paper/viewFile/18327/17443) algoritm (discrete version for 4-connected grid)
 - with_perfect_h - find the shortest paths from all cells to agents goal positions to compute perfect heuristic for A* method (`true` or `false`, considered for CBS, ECBS and Prioritized planning algorithms). Optional parameter, default value is false
 - with_cat - use Conflict avodance table (`true` or `false`, considered for CBS and ECBS algorithms). Optional parameter, default value is false
 - with_card_conf - use cardinal conflicts (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
@@ -36,7 +35,11 @@ The main file contains two sections `map` and `options`:
 - focal_w - weight used in ECBS high level search and in Focal search and SCIPP low level searches for construction of the FOCAL list. Also f-values of optimal nodes in zero_scipp algorithm are multiplied by this value. In any case it is garantied that cost of the found solution will not exceed the optimal cost more than in focal_w times. Optional parameter, default value is 1.0
 - gen_subopt_from_opt - generate suboptimal successors from optimal nodes in zero_scipp alogrithm. Can be `true` or `false`, considered for low_level = `zero_scipp`. Optional parameter, default value is `false`
 
-- neigh_degree - connectedness number for SIPP with 2<sup>k</sup> neighborhood grid (i.e. parameter k). Integer number, greater or equal to 2. Optional parameter, default value is 2
+- neigh_degree - connectedness number for 2<sup>k</sup> neighborhood grid (i.e. parameter k). Integer number, greater or equal to 2. Optional parameter, default value is 2
+
+- scale - odd integer number. When scale > 1, each cell is divided into scale*scale smaller cells, and the agent is placed in the central cell. Optional parameter, default value is 1
+
+- agent_size - radius of an agent. Double value, must be not more than 0.5 / scale (otherwise the cells occupied during the movement are computed incorrectly). Optional parameter, default value is 0.5
 
 - time_resolution - parameter, used to tansform length of the edges to the integer number of timesteps in SIPP with 2<sup>k</sup> neighborhood grid. Time of transition through an edge equals to the product of its length and time_resolution rounded down. For example, if time_resolution = 1000, transition to the closest orthogonal neighbour takes 1000 timesteps, and transition to the closest diagonal neighbour takes 1414 timesteps.
 

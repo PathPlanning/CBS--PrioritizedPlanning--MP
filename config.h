@@ -2,6 +2,7 @@
 #define	CONFIG_H
 #include <string>
 #include "tinyxml2.h"
+#include "motion_primitives.h"
 
 class Config
 {
@@ -39,6 +40,7 @@ class Config
         int             agentsStep = 1;
         double          focalW = 1.0;
         double          agentSize = 0.5;
+        Primitives      mp;
 
     private:
         bool getValueFromText(tinyxml2::XMLElement *elem, const char *name, const char *typeName, void *field);

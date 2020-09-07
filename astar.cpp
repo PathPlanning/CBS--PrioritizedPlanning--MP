@@ -1,13 +1,6 @@
 #include "astar.h"
 
 template<typename NodeType>
-Astar<NodeType>::Astar(bool WithTime)
-{
-    this->withTime = WithTime;
-    htype = CN_SP_MT_MANH;
-}
-
-template<typename NodeType>
 double Astar<NodeType>::computeHFromCellToCell(int i1, int j1, int i2, int j2)
 {
     auto it = this->perfectHeuristic.find(std::make_pair(NodeType(i1, j1), NodeType(i2, j2)));
@@ -43,8 +36,8 @@ void Astar<NodeType>::getNeigboursWithoutChecks(const Map &map, const Node &cur,
 }
 
 template<typename NodeType>
-void Astar<NodeType>::getPerfectHeuristic(const Map &map, const AgentSet &agentSet, int prevAgentCount) {
-    ISearch<> search(false);
+void Astar<NodeType>::getPerfectHeuristic(const Map &map, const AgentSet &agentSet, Primitives &mp, int prevAgentCount) {
+    ISearch<> search(mp, false);
     for (int i = prevAgentCount; i < agentSet.getAgentCount(); ++i) {
         SearchQueue<Node> queue;
         std::unordered_set<int> visited;
@@ -71,4 +64,3 @@ template class Astar<SIPPNode>;
 template class Astar<ZeroSCIPPNode>;
 template class Astar<SCIPPNode>;
 template class Astar<FSNode>;
-template class Astar<TwoKNeighSIPPNode>;

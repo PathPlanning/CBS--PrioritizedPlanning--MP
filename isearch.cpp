@@ -1,8 +1,9 @@
 #include "isearch.h"
 
 template<typename NodeType>
-ISearch<NodeType>::ISearch(bool WithTime)
+ISearch<NodeType>::ISearch(const Primitives &MP, bool WithTime)
 {
+    mp = MP;
     withTime = WithTime;
 }
 
@@ -117,18 +118,17 @@ void ISearch<NodeType>::findSuccessors(std::list<NodeType> &successors,
                                         const ConstraintsSet &constraints,
                                         bool withCAT, const ConflictAvoidanceTable &CAT)
 {
-    for (int di = -1; di <= 1; ++di) {
-        for (int dj = -1; dj <= 1; ++dj) {
-            int newi = curNode.i + di, newj = curNode.j + dj;
-            if ((di == 0 || dj == 0) && (canStay() || di != 0 || dj != 0) && map.CellOnGrid(newi, newj) &&
-                    map.CellIsTraversable(newi, newj)) {
-                double newh = computeHFromCellToCell(newi, newj, goal_i, goal_j);
-                NodeType neigh(newi, newj, nullptr, curNode.g + 1, newh);
-                neigh.conflictsCount = CAT.getAgentsCount(neigh);
-                createSuccessorsFromNode(curNode, neigh, successors, agentId, constraints, CAT,
-                                         neigh.i == goal_i && neigh.j == goal_j);
-            }
-        }
+    std::vector<Primitive> primitives;
+    mp.getPrimitives(primitives, curNode.i, curNode.j, 0, 1, map);
+    for (auto pr : primitives) {
+        pr.setSource(curNode.i, curNode.j);
+        int newi = pr.target.i;
+        int newj = pr.target.j;
+        int newg = curNode.g + pr.intDuration;
+        double newh = this->computeHFromCellToCell(newi, newj, goal_i, goal_j);
+        NodeType neigh(newi, newj, nullptr, newg, newh, 0, pr.id);
+        createSuccessorsFromNode(curNode, neigh, successors, agentId, constraints, CAT,
+                                 neigh.i == goal_i && neigh.j == goal_j, pr);
     }
 }
 
@@ -178,24 +178,21 @@ bool ISearch<NodeType>::checkGoal(const NodeType &cur, int goalTime, int agentId
 template<typename NodeType>
 void ISearch<NodeType>::createSuccessorsFromNode(const NodeType &cur, NodeType &neigh, std::list<NodeType> &successors,
                                        int agentId, const ConstraintsSet &constraints,
-                                       const ConflictAvoidanceTable &CAT, bool isGoal) {
-    if (!constraints.hasNodeConstraint(neigh.i, neigh.j, neigh.g, agentId) &&
-        !constraints.hasEdgeConstraint(neigh.i, neigh.j, neigh.g, agentId, cur.i, cur.j)) {
-        setHC(neigh, cur, CAT, isGoal);
-        successors.push_back(neigh);
+                                       const ConflictAvoidanceTable &CAT, bool isGoal, Primitive &pr) {
+    for (auto cell : pr.cells) {
+        if (constraints.hasNodeConstraint(cell.i, cell.j, cur.g + cell.interval.first,
+                                          agentId, cell.interval.second - cell.interval.first + 1)) {
+            return;
+        }
     }
+    setHC(neigh, cur, CAT, isGoal);
+    successors.push_back(neigh);
 }
 
 template<typename NodeType>
 void ISearch<NodeType>::makePrimaryPath(Node &curNode, int endTime)
 {
-    if (withTime && endTime != -1) {
-        int startTime = curNode.g;
-        for (curNode.g = endTime - 1; curNode.g > startTime; --curNode.g) {
-            lppath.push_front(curNode);
-        }
-    }
-    lppath.push_front(curNode);
+    this->lppath.push_front(curNode);
     if (curNode.parent != nullptr) {
         makePrimaryPath(*(curNode.parent), curNode.g);
     }
@@ -224,4 +221,3 @@ template class ISearch<SIPPNode>;
 template class ISearch<ZeroSCIPPNode>;
 template class ISearch<SCIPPNode>;
 template class ISearch<FSNode>;
-template class ISearch<TwoKNeighSIPPNode>;

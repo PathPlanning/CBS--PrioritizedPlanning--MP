@@ -8,9 +8,9 @@ template <typename NodeType = ZeroSCIPPNode>
 class ZeroSCIPP : public SIPP<NodeType>
 {
 public:
-    ZeroSCIPP(double Weight = 1.0, bool GenSuboptFromOpt = false) :
-        Astar<NodeType>(true),
-        SIPP<NodeType>(), weight(Weight), genSuboptFromOpt(GenSuboptFromOpt)  {}
+    ZeroSCIPP(const Primitives &mp, double Weight = 1.0, bool GenSuboptFromOpt = false) :
+        Astar<NodeType>(mp, true),
+        SIPP<NodeType>(mp), weight(Weight), genSuboptFromOpt(GenSuboptFromOpt)  {}
     virtual ~ZeroSCIPP();
 
 protected:

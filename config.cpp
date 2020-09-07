@@ -131,15 +131,13 @@ bool Config::getConfig(const char *FileName)
         lowLevel = CN_SP_ST_FS;
     } else if (lowLevelSearch == CNS_SP_ST_SCIPP) {
         lowLevel = CN_SP_ST_SCIPP;
-    } else if (lowLevelSearch == CNS_SP_ST_TKN) {
-        lowLevel = CN_SP_ST_TKN;
     } else {
         std::cout << "Error! Low level search '" << lowLevelSearch << "' is unknown." << std::endl;
         return false;
     }
 
     if (searchType == CN_ST_CBS && !withFocalSearch &&
-            lowLevel != CN_SP_ST_ASTAR && lowLevel != CN_SP_ST_SIPP && lowLevel != CN_SP_ST_TKN) {
+            lowLevel != CN_SP_ST_ASTAR && lowLevel != CN_SP_ST_SIPP) {
         std::cout << "Warning! Specified low level search can not be used in this algorithm. Using A* instead." << std::endl;
         lowLevel = CN_SP_ST_ASTAR;
     }
@@ -157,6 +155,11 @@ bool Config::getConfig(const char *FileName)
     getValueFromText(algorithm, CNS_TAG_TIME_RES, "int", &resolution);
     getValueFromText(algorithm, CNS_TAG_SCALE, "int", &scale);
     getValueFromText(algorithm, CNS_TAG_AGENT_SIZE, "double", &agentSize);
+
+    mp.makeTwoKNeigh(neighDegree, resolution, scale, agentSize);
+    if (searchType != CN_SP_ST_SIPP) {
+        mp.addWaitPrimitive();
+    }
 
     if (neighDegree < 2) {
         std::cout << "Error! The value of neighDegree paramter must be greater or equal to 2'" << std::endl;
