@@ -269,9 +269,11 @@ class Primitives
     public:
     std::vector<std::vector<Primitive>> type0;
     std::vector<std::vector<Primitive>> type1;
+    std::vector<std::vector<Primitive>> type2;
     int time_resolution;
-    bool loadPrimitives(const char* FileName)
+    bool loadPrimitives(const char* FileName, int Time_resolution, int scale, double agentSize)
     {
+        time_resolution = Time_resolution;
         std::string value;
         std::stringstream stream;
 
@@ -299,7 +301,8 @@ class Primitives
                 prim.type = coef->IntAttribute("v0");
 
                 prim.duration = coef->DoubleAttribute("Tf");
-                prim.agentSize = 0.5;
+                prim.intDuration = prim.doubleToInt(prim.duration, time_resolution);
+                prim.agentSize = agentSize;
 
                 prim.source.i = 0;
                 prim.source.j = 0;
@@ -322,7 +325,7 @@ class Primitives
                 prim.j_coefficients.push_back(coef->DoubleAttribute("a4"));
 
                 prim.countCells();
-                prim.countIntervals(0.5, 1000);
+                prim.countIntervals(0.5, time_resolution);
                 if(prim.type == 0)
                 {
                     if(type0.empty() || type0.back().at(0).source.angle_id != prim.source.angle_id)
@@ -338,7 +341,8 @@ class Primitives
                         type1.back().push_back(prim);
                 }
             }
-            for(tinyxml2::XMLElement  *turning = elem->FirstChildElement();turning; turning = turning->NextSiblingElement("time_finish"))
+            type2.push_back({});
+            for(tinyxml2::XMLElement  *turning = elem->FirstChildElement("time_finish"); turning; turning = turning->NextSiblingElement("time_finish"))
             {
                 Primitive prim;
                 prim.type = -1;
@@ -347,10 +351,11 @@ class Primitives
                 prim.source.angle_id = turning->IntAttribute("phi0")/45;
                 prim.target.angle_id = turning->IntAttribute("phif")/45;
                 prim.duration = turning->DoubleAttribute("Tf");
-                prim.agentSize = 0.5;
+                prim.intDuration = prim.doubleToInt(prim.duration, time_resolution);
+                prim.agentSize = agentSize;
                 prim.cells = {Cell(0,0)};
-                prim.cells[0].interval = {0, prim.duration};
-                type0.back().push_back(prim);
+                prim.cells[0].interval = {0, prim.intDuration};
+                type2.back().push_back(prim);
             }
         }
     }
@@ -359,12 +364,21 @@ class Primitives
     {
         Primitive pr;
         pr.intDuration = 1;
+        pr.source.speed = 0;
+        pr.target.speed = 0;
         pr.target.i = 0;
         pr.target.j = 0;
-        pr.id = type1[0].size();
+        pr.id = type0[0].size() + type1[0].size() + type2[0].size();
         pr.cells.push_back(Cell(0, 0));
         pr.cells[0].interval = std::make_pair(0, 1);
-        type1[0].push_back(pr);
+        if (type2.empty()) {
+            type2.push_back({});
+        }
+        for (int k = 0; k < type2.size(); ++k) {
+            pr.source.angle_id = k;
+            pr.target.angle_id = k;
+            type2[k].push_back(pr);
+        }
     }
 
     Primitive getPrimitive(int id) const
@@ -377,17 +391,19 @@ class Primitives
             for(auto t:p)
                 if(t.id == id)
                     return t;
+        for(auto p:type2)
+            for(auto t:p)
+                if(t.id == id)
+                    return t;
     }
     void getPrimitives(std::vector<Primitive> &prims, int i, int j, int angle_id, int speed, const Map& map)
     {
-        /*if(speed == 1)
-            prims = type1[angle_id];
-        else
-            prims = type0[angle_id];*/
-        for(int k = 0; k < type1[angle_id].size(); k++) {
-            if (map.CellOnGrid(i + type1[angle_id][k].target.i, j + type1[angle_id][k].target.j)) {
+        int size = (speed == 0) ? type0[angle_id].size() : type1[angle_id].size();
+        for(int k = 0; k < size; k++) {
+            Primitive prim = (speed == 0) ? type0[angle_id][k] : type1[angle_id][k];
+            if (map.CellOnGrid(i + prim.target.i, j + prim.target.j)) {
                 bool good = true;
-                for(auto c : type1[angle_id][k].getCells()) {
+                for(auto c : prim.getCells()) {
                     if(c.interval.first > -CN_EPSILON) {
                         if (map.CellIsObstacle(i+c.i, j+c.j)) {
                             good = false;
@@ -396,9 +412,17 @@ class Primitives
                     }
                 }
                 if (good) {
-                    prims.push_back(type1[angle_id][k]);
+                    prims.push_back(prim);
                 }
             }
+        }
+    }
+
+    void getTurns(std::vector<Primitive> &prims, int angle_id) {
+        if (type2.empty()) {
+            prims = {};
+        } else {
+            prims = type2[angle_id];
         }
     }
 
@@ -427,10 +451,10 @@ class Primitives
             neigh.insert(std::make_pair(-pair.first, -pair.second));
         }
 
-        type1.push_back({});
+        type0.push_back({});
         for (auto pair : neigh) {
             Primitive prim;
-            prim.id = type1[0].size();
+            prim.id = type0[0].size();
             prim.type = 1;
 
             prim.duration = sqrt(pair.first * pair.first + pair.second * pair.second) / scale;
@@ -440,12 +464,12 @@ class Primitives
             prim.source.i = 0;
             prim.source.j = 0;
             prim.source.angle_id = 0;
-            prim.source.speed = 1;
+            prim.source.speed = 0;
 
             prim.target.i = pair.first;
             prim.target.j = pair.second;
             prim.target.angle_id = 0;
-            prim.target.speed = 1;
+            prim.target.speed = 0;
 
             prim.i_coefficients.push_back(0);
             prim.i_coefficients.push_back(pair.first / prim.duration);
@@ -459,7 +483,7 @@ class Primitives
 
             prim.countCells();
             prim.countIntervals(0.5, time_resolution);
-            type1[0].push_back(prim);
+            type0[0].push_back(prim);
         }
     }
 };

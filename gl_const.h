@@ -52,6 +52,8 @@
         #define CNS_TAG_AGENT_SIZE  "agent_size"
         #define CNS_TAG_AR          "aggregated_results"
         #define CNS_TAG_LOW_LEVEL   "low_level"
+        #define CNS_TAG_MP_TYPE     "mp_type"
+        #define CNS_TAG_MP_FILE     "mp_file"
         #define CNS_TAG_PP_ORDER    "pp_order"
         #define CNS_TAG_PAR_PATHS_1 "parallelize_paths_1"
         #define CNS_TAG_PAR_PATHS_2 "parallelize_paths_2"

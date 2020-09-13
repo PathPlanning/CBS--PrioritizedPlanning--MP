@@ -21,6 +21,8 @@ class Config
         int             maxAgents = -1;
         int             maxTime = 1000;
         std::string     agentsFile;
+        std::string     mpType;
+        std::string     mpFile;
         int             tasksCount = 1;
         int             neighDegree = 2;
         int             scale = 1;

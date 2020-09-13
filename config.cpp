@@ -142,6 +142,32 @@ bool Config::getConfig(const char *FileName)
         lowLevel = CN_SP_ST_ASTAR;
     }
 
+    std::string mpType;
+    success = success && getText(algorithm, CNS_TAG_MP_TYPE, mpType);
+    if (!success) {
+        std::cout << "Error! Incorrect config: one or more required parameters are missing." << std::endl;
+        return false;
+    }
+
+    getValueFromText(algorithm, CNS_TAG_TIME_RES, "int", &resolution);
+    getValueFromText(algorithm, CNS_TAG_SCALE, "int", &scale);
+    getValueFromText(algorithm, CNS_TAG_AGENT_SIZE, "double", &agentSize);
+    if (mpType == "2k_neigh") {
+        getValueFromText(algorithm, CNS_TAG_NEIGH_DEG, "int", &neighDegree);
+        if (neighDegree < 2) {
+            std::cout << "Error! The value of neigh_degree paramter must be greater or equal to 2'" << std::endl;
+            return false;
+        }
+        mp.makeTwoKNeigh(neighDegree, resolution, scale, agentSize);
+    } else if (mpType == "custom") {
+        std::string mpFile;
+        getText(algorithm, CNS_TAG_MP_FILE, mpFile);
+        mp.loadPrimitives(mpFile.c_str(), resolution, scale, agentSize);
+    }
+    if (lowLevel != CN_SP_ST_SIPP) {
+        mp.addWaitPrimitive();
+    }
+
     getValueFromText(algorithm, CNS_TAG_WITH_CAT, "bool", &withCAT);
     getValueFromText(algorithm, CNS_TAG_WITH_PH, "bool", &withPerfectHeuristic);
     getValueFromText(algorithm, CNS_TAG_PP_ORDER, "int", &ppOrder);
@@ -151,20 +177,6 @@ bool Config::getConfig(const char *FileName)
     getValueFromText(algorithm, CNS_TAG_WITH_DS, "bool", &withDisjointSplitting);
     getValueFromText(algorithm, CNS_TAG_FOCAL_W, "double", &focalW);
     getValueFromText(algorithm, CNS_TAG_SFO, "bool", &genSuboptFromOpt);
-    getValueFromText(algorithm, CNS_TAG_NEIGH_DEG, "int", &neighDegree);
-    getValueFromText(algorithm, CNS_TAG_TIME_RES, "int", &resolution);
-    getValueFromText(algorithm, CNS_TAG_SCALE, "int", &scale);
-    getValueFromText(algorithm, CNS_TAG_AGENT_SIZE, "double", &agentSize);
-
-    mp.makeTwoKNeigh(neighDegree, resolution, scale, agentSize);
-    if (searchType != CN_SP_ST_SIPP) {
-        mp.addWaitPrimitive();
-    }
-
-    if (neighDegree < 2) {
-        std::cout << "Error! The value of neighDegree paramter must be greater or equal to 2'" << std::endl;
-        return false;
-    }
 
     storeConflicts = withFocalSearch || withBypassing || withMatchingHeuristic || withDisjointSplitting || withCardinalConflicts;
     withCardinalConflicts = withCardinalConflicts || withMatchingHeuristic || withDisjointSplitting;

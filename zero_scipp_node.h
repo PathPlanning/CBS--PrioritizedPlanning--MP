@@ -7,9 +7,9 @@ struct ZeroSCIPPNode : public SIPPNode
 {
     bool optimal;
 
-    ZeroSCIPPNode(int x = 0, int y = 0, Node *p = nullptr, int g_ = 0, double H_ = 0, int ConflictsCount = 0, bool Optimal = true) :
-        Node(x, y, p, g_, H_, ConflictsCount),
-        SIPPNode(x, y, p, g_, H_, ConflictsCount),
+    ZeroSCIPPNode(int x = 0, int y = 0, Node *p = nullptr, int g_ = 0, double H_ = 0, int ConflictsCount = 0, int PrimitiveId = -1, int AngleType = 0, int Speed = 0, bool Optimal = true) :
+        Node(x, y, p, g_, H_, ConflictsCount, PrimitiveId, AngleType, Speed),
+        SIPPNode(x, y, p, g_, H_, ConflictsCount, PrimitiveId, AngleType, Speed),
         optimal(Optimal) {}
 
     //WeightedSIPPNode(const Node &other) : Node(other) {}

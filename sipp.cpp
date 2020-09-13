@@ -104,8 +104,12 @@ void SIPP<NodeType>::createSuccessorsFromNode(const NodeType &cur, NodeType &nei
                     neigh.g = newg + std::max(beg, waitTime);
                     neigh.F = neigh.H + neigh.g;
                     successors.push_back(neigh);
+                    break;
                 }
                 --safeCellsCount;
+            }
+            if (i < events.size() && events[i].time == curTime) {
+                break;
             }
         }
     }

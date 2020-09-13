@@ -119,16 +119,31 @@ void ISearch<NodeType>::findSuccessors(std::list<NodeType> &successors,
                                         bool withCAT, const ConflictAvoidanceTable &CAT)
 {
     std::vector<Primitive> primitives;
-    mp.getPrimitives(primitives, curNode.i, curNode.j, 0, 1, map);
+    mp.getPrimitives(primitives, curNode.i, curNode.j, curNode.angleId, curNode.speed, map);
     for (auto pr : primitives) {
         pr.setSource(curNode.i, curNode.j);
         int newi = pr.target.i;
         int newj = pr.target.j;
         int newg = curNode.g + pr.intDuration;
         double newh = this->computeHFromCellToCell(newi, newj, goal_i, goal_j);
-        NodeType neigh(newi, newj, nullptr, newg, newh, 0, pr.id);
+        NodeType neigh(newi, newj, nullptr, newg, newh, 0, pr.id, pr.target.angle_id, pr.target.speed);
         createSuccessorsFromNode(curNode, neigh, successors, agentId, constraints, CAT,
                                  neigh.i == goal_i && neigh.j == goal_j, pr);
+    }
+    if (curNode.speed == 0) {
+        std::vector<Primitive> turns;
+        mp.getTurns(turns, curNode.angleId);
+        NodeType neigh = curNode;
+        int constraintTime = constraints.getFirstConstraintTime(curNode.i, curNode.j, curNode.g, agentId);
+        for (auto turn : turns) {
+            if (curNode.g + turn.intDuration < constraintTime) {
+                neigh.primitiveId = turn.id;
+                neigh.g = curNode.g + turn.intDuration;
+                neigh.F = neigh.g + neigh.H;
+                neigh.angleId = turn.target.angle_id;
+                successors.push_back(neigh);
+            }
+        }
     }
 }
 

@@ -11,11 +11,13 @@ struct Node
     double  F, H; //f-, g- and h-values of the search node
     Node    *parent; //backpointer to the predecessor node (e.g. the node which g-value was used to set the g-velue of the current node)
     int     conflictsCount;
+    int     speed;
+    int     angleId;
 
     int primitiveId;
 
     Node(int x = 0, int y = 0, Node *p = nullptr, int g_ = 0, double H_ = 0,
-         int ConflictsCount = 0, int PrimitiveId = -1) {
+         int ConflictsCount = 0, int PrimitiveId = -1, int AngleType = 0, int Speed = 0) {
         i = x;
         j = y;
         parent = p;
@@ -24,6 +26,8 @@ struct Node
         F = g_ + H_;
         conflictsCount = ConflictsCount;
         primitiveId = PrimitiveId;
+        speed = Speed;
+        angleId = AngleType;
     }
 
     bool operator== (const Node &other) const {
@@ -33,13 +37,14 @@ struct Node
         return i != other.i || j != other.j;
     }
     bool operator< (const Node &other) const {
-        return std::tuple<int, int, int, int>(F, -g, i, j) <
-                std::tuple<int, int, int, int>(other.F, -other.g, other.i, other.j);
+        return std::tuple<int, int, int, int, int, int>(F, -g, i, j, speed, angleId) <
+                std::tuple<int, int, int, int, int, int>(other.F, -other.g, other.i,
+                                                         other.j, other.speed, other.angleId);
     }
 
     virtual int convolution(int width, int height, bool withTime = false) const {
         int res = withTime ? width * height * g : 0;
-        return res + i * width + j;
+        return 2 * 8 * (res + i * width + j) + 2 * angleId + speed;
     }
 };
 

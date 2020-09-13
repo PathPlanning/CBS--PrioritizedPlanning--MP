@@ -44,10 +44,8 @@ void ConflictBasedSearch<SearchType>::getOccupiedNodes(std::vector<SIPPNode> &no
     }
 
     nodes[0].startTime = lastStart[agentId];
-    if (nodes.size() > 1) {
-        lastStart[agentId] = nodes.back().startTime;
-        nodes.pop_back();
-    }
+    lastStart[agentId] = nodes.back().startTime;
+    nodes.pop_back();
 }
 
 template<typename SearchType>
