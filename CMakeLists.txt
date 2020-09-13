@@ -1,46 +1,62 @@
 cmake_minimum_required(VERSION 2.8)
-project(ASearch)
+project(MultiAgentSearch)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2 -Wall -Wextra")
 set(SOURCE_FILES
         agent.cpp
         agent_set.cpp
+        astar.cpp
+        config.cpp
         conflict_avoidance_table.cpp
         conflict_based_search.cpp
+        conflict_set.cpp
         constraints_set.cpp
+        dijkstra.cpp
+        focalsearch.cpp
+        isearch.cpp
+        main.cpp
+        map.cpp
+        mission.cpp
+        multiagent_search_interface.cpp
         prioritized_planning.cpp
+        scipp.cpp
+        search_queue.cpp
+        sipp.cpp
         tinyxml2.cpp
         xmllogger.cpp
-        isearch.cpp
-        mission.cpp
-        map.cpp
-        dijkstra.cpp
-        config.cpp
-        astar.cpp
-        main.cpp
-        environmentoptions.cpp
+        zero_scipp.cpp
         agent.h
         agent_move.h
         agent_set.h
+        astar.h
         cbs_node.h
-        conflict.h
+        config.h
         conflict_avoidance_table.h
         conflict_based_search.h
-        constraint.h
+        conflict_set.h
         constraints_set.h
-        multiagent_search_result.h
-        prioritized_planning.h
-        tinyxml2.h
-        node.h
-        gl_const.h
-        xmllogger.h
-        isearch.h
-        mission.h
-        map.h
-        ilogger.h
         dijkstra.h
-        config.h
-        astar.h
+        focalsearch.h
+        fs_node.h
+        gl_const.h
+        ilogger.h
+        isearch.h
+        map.h
+        mission.h
+        motion_primitives.h
+        multiagent_search_interface.h
+        multiagent_search_result.h
+        node.h
+        prioritized_planning.h
+        scipp.h
+        scipp_node.h
+        search_queue.h
         searchresult.h
-        environmentoptions.h
+        sipp.h
+        sipp_node.h
+        testing_results.h
+        tinyxml2.h
+        xmllogger.h
+        zero_scipp.h
+        zero_scipp_node.h
         )
 add_executable(ASearch ${SOURCE_FILES})

@@ -1,3 +1,3 @@
-#include "multiagent_search_inteface.h"
+#include "multiagent_search_interface.h"
 
 MultiagentSearchInterface::~MultiagentSearchInterface(void) {}

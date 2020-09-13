@@ -58,7 +58,7 @@ HEADERS += \
     focalsearch.h \
     fs_node.h \
     motion_primitives.h \
-    multiagent_search_inteface.h \
+    multiagent_search_interface.h \
     multiagent_search_result.h \
     prioritized_planning.h \
     scipp.h \
