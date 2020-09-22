@@ -22,7 +22,6 @@ struct CBSNode
     int                                         cost;
     int                                         id;
     int                                         H, G;
-    bool                                        hasPositiveConstraint;
     bool                                        pathFound;
 
     CBSNode(CBSNode *p = nullptr, int Cost = 0) {
@@ -30,7 +29,6 @@ struct CBSNode
         cost = Cost;
         id = curId++;
         H = 0;
-        hasPositiveConstraint = false;
         pathFound = true;
         hc = 0;
         sumLb = 0;

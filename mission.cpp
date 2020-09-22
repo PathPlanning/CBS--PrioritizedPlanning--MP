@@ -306,7 +306,8 @@ void Mission::saveAgentsPathsToLog(const std::string &agentsFile, double time,
                                    int HLExpansions, int HLNodes,
                                    double LLExpansions, double LLNodes) {
     logger->writeToLogAgentsPaths(agentSet, agentsPaths, agentsFile, time, makespan, flowtime,
-                                  HLExpansions, HLNodes, LLExpansions, LLNodes, config.scale);
+                                  HLExpansions, HLNodes, LLExpansions, LLNodes, config.scale,
+                                  config.breakPrimitives, config.timeStep, config.mp);
     logger->saveLog();
 }
 

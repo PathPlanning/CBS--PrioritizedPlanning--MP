@@ -262,6 +262,20 @@ public:
                 t += 0.1;
         }
     }
+
+    void getPositions(std::vector<std::tuple<double, double, double>>& positions,
+                      const Node& start, int startTime, int endTime, int step, int resolution) {
+        int waitTime = endTime - startTime - intDuration;
+        for (int time = 0; time < waitTime; time += step) {
+            positions.push_back(std::make_tuple(start.i, start.j, double(time) / resolution));
+        }
+        for (int time = waitTime; time + startTime < endTime; time += step) {
+            auto p = getPos(double(time - waitTime) / resolution);
+            positions.push_back(std::make_tuple(p.i + start.i, p.j + start.j, double(time) / resolution));
+        }
+        positions.push_back(std::make_tuple(target.i + start.i, target.j + start.j,
+                                            double(endTime - startTime) / resolution));
+    }
 };
 
 class Primitives
@@ -419,7 +433,7 @@ class Primitives
     }
 
     void getTurns(std::vector<Primitive> &prims, int angle_id) {
-        if (type2.empty()) {
+        if (type2.empty() || type2[0].empty()) {
             prims = {};
         } else {
             prims = type2[angle_id];

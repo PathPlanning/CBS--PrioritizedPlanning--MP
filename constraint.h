@@ -12,7 +12,6 @@ struct Constraint
     int     agentId;
     int     prev_i, prev_j;
     bool    goalNode;
-    bool    positive;
 
     Constraint(int x = 0, int y = 0, int Time = 0, int AgentId = 0, int PrevI = -1, int PrevJ = -1, bool GoalNode = false) {
         i = x;
@@ -22,7 +21,6 @@ struct Constraint
         prev_i = PrevI;
         prev_j = PrevJ;
         goalNode = GoalNode;
-        positive = false;
         dur = 1;
     }
 

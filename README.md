@@ -16,39 +16,30 @@ The main file contains two sections `map` and `options`:
 - grid - contains attributes `width` and `height` specifing dimensions of the map. Map description is provided in the tag body, 0 means a traversable cell and 1 means an obstacle. Each row is included into `row` tag, number of rows must be equal to the `height` value and number of digits in every row must be equal to the `width` value.
 
 ### Section `algorithm` - definition of the algorihm parameters. Contains following tags:
-- algorithm - algorithm to be used. Can take following values:
+- planner - algorithm to be used. Can take following values:
     1. cbs - Conflict based search
     2. ecbs - Enhanced conflict based search. In the high level search secondary heuristic h3 from the [article](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875) is used. Low level search depends on the low_level option
-    3. prioritized_planning - Prioritized planning
 - low_level - algorithm, applied in the low level search in CBS, ECBS and Prioritized planning algorithms. Can take following values:
     1. astar - algorithm [A*](https://www.cs.auckland.ac.nz/courses/compsci709s2c/resources/Mike.d/astarNilsson.pdf)
     2. sipp - algorithm [SIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875) (discrete version for 4-connected grid)
-    3. zero_scipp - suboptimal version of SIPP algorithm described [here](https://docs.google.com/document/d/16NjWHubNFczPDGi3QqWkMrWE8ewQtOBXruUBaa9hQnw/edit)
-    4. focal_search - focal search algorithm, as in original ECBS [paper](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875). Secondary heuristic is defined as number of vertex conflicts on the partial path to the current vertex
-    5. scipp - [SCIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS19/paper/viewFile/18327/17443) algoritm (discrete version for 4-connected grid)
 - with_perfect_h - find the shortest paths from all cells to agents goal positions to compute perfect heuristic for A* method (`true` or `false`, considered for CBS, ECBS and Prioritized planning algorithms). Optional parameter, default value is false
-- with_cat - use Conflict avodance table (`true` or `false`, considered for CBS and ECBS algorithms). Optional parameter, default value is false
 - with_card_conf - use cardinal conflicts (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
 - with_bypassing - use conflict bypassing (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
 - with_matching_h - compute heuristic on vertices of constraint tree in CBS, based on maximal matching in cardinal conflicts graph. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps18a.pdf) as ICBS-h1, can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
-- with_disjoint_splitting - use disjoint splitting. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps19a.pdf), can be `true` or `false`, considered for CBS and ECBS algorithms. When using this option, with_card_conf option is set to `true`. Optional parameter, default value is false
-- focal_w - weight used in ECBS high level search and in Focal search and SCIPP low level searches for construction of the FOCAL list. Also f-values of optimal nodes in zero_scipp algorithm are multiplied by this value. In any case it is garantied that cost of the found solution will not exceed the optimal cost more than in focal_w times. Optional parameter, default value is 1.0
-- gen_subopt_from_opt - generate suboptimal successors from optimal nodes in zero_scipp alogrithm. Can be `true` or `false`, considered for low_level = `zero_scipp`. Optional parameter, default value is `false`
 
-- neigh_degree - connectedness number for 2<sup>k</sup> neighborhood grid (i.e. parameter k). Integer number, greater or equal to 2. Optional parameter, default value is 2
+- mp_type - type of motion primitives to use. Can take following values:
+    1. 2k_neigh - agents are moving on [2<sup>k</sup> neighborhood grid](https://jair.org/index.php/jair/article/download/11383/26555/) (where k equals to neigh_degree parameter) with constant speed and time of transition through an edge equals to its length. Also no rotate primitives are used and all turn are made instantly
+    2. custom - primitives are taken from the file provided in the mp_file parameter
+
+- neigh_degree - connectedness number for 2<sup>k</sup> neighborhood grid (i.e. parameter k). Integer number, greater or equal to 2. Considered for mp_type = 2k_neigh, optional parameter, default value is 2
+
+- mp_file - name of the file with motion primitives description. Required parameter for mp_type = custom
 
 - scale - odd integer number. When scale > 1, each cell is divided into scale*scale smaller cells, and the agent is placed in the central cell. Optional parameter, default value is 1
 
 - agent_size - radius of an agent. Double value, must be not more than 0.5 / scale (otherwise the cells occupied during the movement are computed incorrectly). Optional parameter, default value is 0.5
 
 - time_resolution - parameter, used to tansform length of the edges to the integer number of timesteps in SIPP with 2<sup>k</sup> neighborhood grid. Time of transition through an edge equals to the product of its length and time_resolution rounded down. For example, if time_resolution = 1000, transition to the closest orthogonal neighbour takes 1000 timesteps, and transition to the closest diagonal neighbour takes 1414 timesteps.
-
-- pp_order - specifies a method of agents priorities definition for Prioritized Planning. Can take following values:
-    - 0 - agents are considered in the same order as in the input file
-    - 1 - agents are considered in increasing order of manhattan distances from start to goal node
-    - 2 - agents are considered in decreasing order of manhattan distances from start to goal node
-
-    Optional parameter, default value is 0
 
 ### Section `options` - definition of the testing parameters. Contains following tags:
 - agents_file - common prefix for the input files with agents’ description
@@ -57,6 +48,8 @@ The main file contains two sections `map` and `options`:
 - agents_step - incrementation step of number of agents for testing. Optional parameter, default value is 1
 - maxtime - maximal running time of the algorihm in milliseconds. Optional parameter, default value is 1000
 - single_execution - can be `true` or `false`. If option is set to `true`, the algorithm will be executed only once for the first agents file with the number of agents equal to `max` attribute in agents_range option. Output file format will also be different (see "Output data" section). Optional parameter, default value is false
+- pointwise_output - add intermediate points into the agents paths in the output file (used for visualisation). Can be `true` or `false`, considered if single_execution = `true`. Optional parameter, default value is `true`
+- time_step - interval between intermediate points in pointwise output. Integer number of timesteps, duration of which depends on the time_resolution parameter. For example, if time_resolution = 1000 and time_step = 10 there will be 100 intermediate points per one second. Optional parameter, default value is 1, considered if single_execution = `true` and pointwise_output = `true`
 - aggregated_results - save separate testing results for each agents file or aggregated results over all agents files. Optional parameter, default value is true
 - logpath - path to the directory, where log will be stored (optional parameter, by default log is stored to the same directory where the input file is located)
 - logfilename - name of the log file (optional parameter, by default name of the log file has the form `input_file_name_log.xml` where "input_file_name.xml" is a name of the main input file)
@@ -100,7 +93,7 @@ If single_execution=`true`, following tags are created (tag aggregated_results i
   This tag also includes tag `path` with `pathfound` attribute, which can be `true` or `false` depending on whether the solution was found. Tag `path` includes several `section` tags each of which corresponds to one agent’s action and contains the following tags:
     - id - section id
     - start.x, start.y - agent position before taking action
-    - goal.x, goal.y - agent position after taking action (this position is either the same as the start position either adjacent to it)
-    - duration - duration of the action (always equals 1)
+    - goal.x, goal.y - agent position after taking action
+    - duration - duration of the action
 
 [Example](Examples/empty_single_log.xml) of output file for this mode.

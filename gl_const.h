@@ -63,6 +63,8 @@
             #define CNS_TAG_MIN     "min"
             #define CNS_TAG_MAX     "max"
         #define CNS_TAG_AGENTS_STEP "agents_step"
+        #define CNS_TAG_BREAK_PR    "pointwise_output"
+        #define CNS_TAG_TIME_STEP   "time_step"
 
     #define CNS_TAG_LOG             "log"
         #define CNS_TAG_MAPFN       "mapfilename"

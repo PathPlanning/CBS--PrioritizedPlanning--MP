@@ -14,14 +14,10 @@ void ConstraintsSet::addPositiveConstraint(int i, int j, int time, int agentId, 
 }
 
 void ConstraintsSet::addConstraint(Constraint &constraint) {
-    if (constraint.positive) {
-        positiveConstraints.push_back(constraint);
-    } else if (constraint.prev_i == -1) {
-        if (constraint.goalNode) {
-            goalNodeConstraints.insert(constraint);
-        } else {
-            nodeConstraints.insert(constraint);
-        }
+    if (constraint.goalNode) {
+        goalNodeConstraints.insert(constraint);
+    } else {
+        nodeConstraints.insert(constraint);
     }
 }
 

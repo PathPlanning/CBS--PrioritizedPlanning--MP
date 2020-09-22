@@ -34,6 +34,7 @@ set(SOURCE_FILES
         conflict_avoidance_table.h
         conflict_based_search.h
         conflict_set.h
+        constraint.h
         constraints_set.h
         dijkstra.h
         focalsearch.h

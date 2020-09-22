@@ -35,10 +35,11 @@ class Config
         bool            withBypassing = false;
         bool            withMatchingHeuristic = false;
         bool            storeConflicts = false;
-        bool            withDisjointSplitting;
         bool            withFocalSearch = false;
         bool            genSuboptFromOpt = false;
         bool            saveAggregatedResults = true;
+        bool            breakPrimitives = true;
+        int             timeStep = 1;
         int             agentsStep = 1;
         double          focalW = 1.0;
         double          agentSize = 0.5;

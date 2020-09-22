@@ -93,6 +93,8 @@ bool Config::getConfig(const char *FileName)
     getValueFromText(options, CNS_TAG_SINGLE_EX, "bool", &singleExecution);
     getValueFromText(options, CNS_TAG_AR, "bool", &saveAggregatedResults);
     getValueFromText(options, CNS_TAG_AGENTS_STEP, "int", &agentsStep);
+    getValueFromText(options, CNS_TAG_BREAK_PR, "bool", &breakPrimitives);
+    getValueFromText(options, CNS_TAG_TIME_STEP, "int", &timeStep);
 
 
     algorithm = getChild(root, CNS_TAG_ALG);
@@ -174,12 +176,11 @@ bool Config::getConfig(const char *FileName)
     getValueFromText(algorithm, CNS_TAG_CARD_CONF, "bool", &withCardinalConflicts);
     getValueFromText(algorithm, CNS_TAG_BYPASSING, "bool", &withBypassing);
     getValueFromText(algorithm, CNS_TAG_WITH_MH, "bool", &withMatchingHeuristic);
-    getValueFromText(algorithm, CNS_TAG_WITH_DS, "bool", &withDisjointSplitting);
     getValueFromText(algorithm, CNS_TAG_FOCAL_W, "double", &focalW);
     getValueFromText(algorithm, CNS_TAG_SFO, "bool", &genSuboptFromOpt);
 
-    storeConflicts = withFocalSearch || withBypassing || withMatchingHeuristic || withDisjointSplitting || withCardinalConflicts;
-    withCardinalConflicts = withCardinalConflicts || withMatchingHeuristic || withDisjointSplitting;
+    storeConflicts = withFocalSearch || withBypassing || withMatchingHeuristic || withCardinalConflicts;
+    withCardinalConflicts = withCardinalConflicts || withMatchingHeuristic;
     return true;
 }
 

@@ -2,7 +2,8 @@
 #define	ILOGGER_H
 #include "map.h"
 #include "testing_results.h"
-#include <node.h>
+#include "node.h"
+#include "motion_primitives.h"
 #include <unordered_map>
 #include <list>
 
@@ -21,7 +22,8 @@ class ILogger
                                            const std::string &agentsFile, double time,
                                            double makespan, double flowtime,
                                            int HLExpansions, int HLNodes,
-                                           double LLExpansions, double LLNodes, int scale) = 0;
+                                           double LLExpansions, double LLNodes, int scale,
+                                           bool breakPrimitives, int step, const Primitives& mp) = 0;
         virtual void writeToLogNotFound() = 0;
         virtual void writeToLogAggregatedResults(std::map<int, int>& successCount,
                                                  TestingResults &res,
