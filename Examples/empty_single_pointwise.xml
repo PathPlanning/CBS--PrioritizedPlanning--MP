@@ -27,21 +27,22 @@
         <with_card_conf>false</with_card_conf>
         <with_bypassing>false</with_bypassing>
         <with_matching_h>false</with_matching_h>
-        <mp_type>2k_neigh</mp_type>
+        <mp_type>custom</mp_type>
         <neigh_degree>2</neigh_degree>
+        <mp_file>trajectories_moving.xml</mp_file>
         <scale>1</scale>
         <agent_size>0.5</agent_size>
         <time_resolution>100</time_resolution>
     </algorithm>
     <options>
         <agents_file>empty-16-16-random</agents_file>
-        <tasks_count>2</tasks_count>
-        <agents_range min="1" max="16"/>
+        <tasks_count>1</tasks_count>
+        <agents_range min="1" max="4"/>
         <agents_step>1</agents_step>
         <maxtime>1000</maxtime>
-        <single_execution>false</single_execution>
-        <aggregated_results>true</aggregated_results>
-        <pointwise_output>false</pointwise_output>
+        <single_execution>true</single_execution>
+        <aggregated_results>false</aggregated_results>
+        <pointwise_output>true</pointwise_output>
         <time_step>10</time_step>
     <logfilename />
   </options>

@@ -94,5 +94,7 @@ DISTFILES += \
     Examples/empty_single.xml \
     Examples/empty_single_log.xml \
     Examples/empty_single_log.xml \
+    Examples/empty_single_pointwise.xml \
+    Examples/empty_single_pointwise_log.xml \
     README-RU.md \
     README.md
