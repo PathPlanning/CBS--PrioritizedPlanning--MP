@@ -38,7 +38,7 @@ class Config
         bool            withFocalSearch = false;
         bool            genSuboptFromOpt = false;
         bool            saveAggregatedResults = true;
-        bool            breakPrimitives = true;
+        bool            breakPrimitives = false;
         int             timeStep = 1;
         int             agentsStep = 1;
         double          focalW = 1.0;

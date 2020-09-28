@@ -22,10 +22,10 @@ The main file contains two sections `map` and `options`:
 - low_level - algorithm, applied in the low level search in CBS and ECBS algorithms. Can take following values:
     1. astar - algorithm [A*](https://www.cs.auckland.ac.nz/courses/compsci709s2c/resources/Mike.d/astarNilsson.pdf)
     2. sipp - algorithm [SIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875)
-- with_perfect_h - find the shortest paths from all cells to agents goal positions to compute perfect heuristic for A* method (`true` or `false`, considered for CBS, ECBS and Prioritized planning algorithms). Optional parameter, default value is false
+- with_perfect_h - find the shortest paths from all cells to agents goal positions to compute perfect heuristic for A* method (`true` or `false`). Optional parameter, default value is false
 - with_card_conf - use cardinal conflicts (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
-- with_bypassing - use conflict bypassing (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
-- with_matching_h - compute heuristic on vertices of constraint tree in CBS, based on maximal matching in cardinal conflicts graph. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps18a.pdf) as ICBS-h1, can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
+- with_bypassing - use conflict bypassing (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`. Optional parameter, default value is false
+- with_matching_h - compute heuristic on vertices of constraint tree in CBS, based on maximal matching in cardinal conflicts graph. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps18a.pdf) as ICBS-h1, can be `true` or `false`. Optional parameter, default value is false
 
 - mp_type - type of motion primitives to use. Can take following values:
     1. 2k_neigh - agents are moving on [2<sup>k</sup> neighborhood grid](https://jair.org/index.php/jair/article/download/11383/26555/) (where k equals to neigh_degree parameter) with constant speed and time of transition through an edge equals to its length. Also no rotate primitives are used and all turn are made instantly
@@ -33,13 +33,13 @@ The main file contains two sections `map` and `options`:
 
 - neigh_degree - connectedness number for 2<sup>k</sup> neighborhood grid (i.e. parameter k). Integer number, greater or equal to 2. Considered for mp_type = 2k_neigh, optional parameter, default value is 2
 
-- mp_file - name of the file with motion primitives description. Required parameter for mp_type = custom
+- mp_file - name of the file with motion primitives description in the format desribed in "Primitive description" section. Required parameter for mp_type = custom
 
 - scale - odd integer number. When scale > 1, each cell is divided into scale*scale smaller cells, and the agent is placed in the central cell. Optional parameter, default value is 1
 
 - agent_size - radius of an agent. Double value, must be not more than 0.5 / scale (otherwise the cells occupied during the movement are computed incorrectly). Optional parameter, default value is 0.5
 
-- time_resolution - parameter, used to tansform length of the edges to the integer number of timesteps in SIPP with 2<sup>k</sup> neighborhood grid. Time of transition through an edge equals to the product of its length and time_resolution rounded down. For example, if time_resolution = 1000, transition to the closest orthogonal neighbour takes 1000 timesteps, and transition to the closest diagonal neighbour takes 1414 timesteps.
+- time_resolution - parameter, used to tansform primitive duration to the integer number of timesteps. Time of transition through an edge equals to the product of its length and time_resolution rounded down. For example, if time_resolution = 1000, transition to the closest orthogonal neighbour takes 1000 timesteps, and transition to the closest diagonal neighbour takes 1414 timesteps.
 
 ### Section `options` - definition of the testing parameters. Contains following tags:
 - agents_file - common prefix for the input files with agents’ description
@@ -60,6 +60,17 @@ For each agent its own tag `agent` is provided with following attributes:
 - id - agent’s id
 - start_i, start_j - coordinates of agent’s start position (cells are numbered from 0, cell (0, 0) is in the left upper corner of the map, the first coordinate corresponds to the row number and the second to the column number)
 - goal_i, goal_j - coordinates of agent’s goal position
+
+### Primitive description
+File contains one or more section tags. Every section corresponds to one agent orientation. Every section tag contains coeff and time_finish tags describing moving and rotation primitives. coeff tags have following attributes:
+- id - primitive id
+- Tf - primitive duration
+- xf, yf - final position
+- a1, a2, a3, a4, b1, b2, b3, b4 - coefficients, describing agent trajectory. Namely, the coordinates of the agent are cumputed as x(t) = a<sub>4</sub>t<sup>3</sup>+a<sub>3</sub>t<sup>2</sup>+a<sub>2</sub>t+a<sub>1</sub>,  y(t) = b<sub>4</sub>t<sup>3</sup>+b<sub>3</sub>t<sup>2</sup>+b<sub>2</sub>t+b<sub>1</sub> and its orientation angle is computed as arctg(y'(t)/x'(t)) = arctg((3b<sub>3</sub>t<sup>2</sup>+2b<sub>2</sub>t+b<sub>2</sub>) / (3a<sub>3</sub>t<sup>2</sup>+2a<sub>2</sub>t+a<sub>2</sub>)
+- v0, v1 - initial and final speed of an agent
+- phi0, phif - initial and final orientation of an agent (in degrees)
+
+Values v0, v1, phi0 and phif are used only to check correctness of transition between the states (agent can execute the primitive only if its current orientation and speed are equal to the phi0 and v0 values in this primitive, rotates are possible only if current speed is equal 0), actual speed and orientation of the agent depend only on the coefficients. The time_finish tags describe rotate primitives and contain only id, Tf, phi0 and phif attributes. To simulate 2k_neigh primitives-like behaviour (speed is not considered and all rotates are made instantly) one should remove all time_finish tags, put all primitives in one section and make all v0, v1, phi0, phif values equal 0. [Example](Examples/trajectories_moving.xml) of primitives description with turns. [Example](Examples/trajectories_moving_no_turns.xml) of primitives description without turns.
 
 ## Output data
 Output file contains `map` and `options` sections, similar to the input file, and also the `log` section with results of the execution. This section contains the `mapfilename` tag and several other tags depending on the value of single_execution and aggregated_results parameters.
@@ -90,10 +101,10 @@ If single_execution=`true`, following tags are created (tag aggregated_results i
 
   **Coordinate x corresponds to j coordinate, and y cooresponds to i coordinate.**
 
-  This tag also includes tag `path` with `pathfound` attribute, which can be `true` or `false` depending on whether the solution was found. Tag `path` includes several `section` tags each of which corresponds to one agent’s action and contains the following tags:
+  This tag also includes tag `path` with `pathfound` attribute, which can be `true` or `false` depending on whether the solution was found. Tag `path` includes several `section` tags each of which corresponds to one agent’s movement. If pointwise_output = `false` one movement corresponds to whole primitive, otherwise movements between intermediate points are added. Tag contains following atributes:
     - id - section id
     - start.x, start.y - agent position before taking action
     - goal.x, goal.y - agent position after taking action
     - duration - duration of the action
 
-[Example](Examples/empty_single_log.xml) of output file for this mode.
+[Example](Examples/empty_single_log.xml) of output file for this mode with pointwise_output = `false`. [Example](Examples/empty_single_log_pointwise.xml) of output file for this mode with pointwise_output = `true`.
