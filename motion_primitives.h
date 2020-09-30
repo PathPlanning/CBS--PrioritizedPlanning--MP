@@ -165,18 +165,16 @@ public:
         return {begin + it->interval.first, begin + it->interval.second};
     }
 
-    double getAngle(double t)
+    double getAngle(double t, bool orth = true)
     {
-        return atan2(i_coefficients[1]+2*i_coefficients[2]*t + 3*i_coefficients[3]*t*t,j_coefficients[1]+2*j_coefficients[2]*t+3*j_coefficients[3]*t*t);
-
         if(type < 0)
             return -1;
-        if(j_coefficients[1]+2*j_coefficients[2]*t+3*j_coefficients[3]*t*t < CN_EPSILON && fabs(i_coefficients[2]) < CN_EPSILON &&
-                (fabs(i_coefficients[3]) >= CN_EPSILON || fabs(j_coefficients[2]) >= CN_EPSILON || fabs(j_coefficients[3]) >= CN_EPSILON))
-        {
-            return CN_PI - i_coefficients[1] * CN_PI / 2;
+        double num = i_coefficients[1]+2*i_coefficients[2]*t + 3*i_coefficients[3]*t*t;
+        double denum = j_coefficients[1]+2*j_coefficients[2]*t+3*j_coefficients[3]*t*t;
+        if (!orth) {
+            std::swap(num, denum);
         }
-        return atan2(i_coefficients[1]+2*i_coefficients[2]*t + 3*i_coefficients[3]*t*t,j_coefficients[1]+2*j_coefficients[2]*t+3*j_coefficients[3]*t*t);
+        return atan2(num, denum);
     }
     Point getPos(double t)
     {
@@ -263,18 +261,34 @@ public:
         }
     }
 
-    void getPositions(std::vector<std::tuple<double, double, double>>& positions,
+   static double idToAngle(int id) {
+        double res = CN_PI / 2 - CN_PI / 4 * id;
+        if (res < -CN_PI) {
+            res += 2 * CN_PI;
+        }
+        return res;
+    }
+
+    void getPositions(std::vector<std::tuple<double, double, double, double>>& positions,
                       const Node& start, int startTime, int endTime, int step, int resolution) {
         int waitTime = endTime - startTime - intDuration;
         for (int time = 0; time < waitTime; time += step) {
-            positions.push_back(std::make_tuple(start.i, start.j, double(time) / resolution));
+            positions.push_back(std::make_tuple(start.i, start.j, double(time) / resolution,
+                                                idToAngle(source.angle_id)));
         }
         for (int time = waitTime; time + startTime < endTime; time += step) {
             auto p = getPos(double(time - waitTime) / resolution);
-            positions.push_back(std::make_tuple(p.i + start.i, p.j + start.j, double(time) / resolution));
+            double angle;
+            if (time == 0) {
+                angle = idToAngle(source.angle_id);
+            } else {
+                angle = getAngle(double(time - waitTime) / resolution, false);
+            }
+            positions.push_back(std::make_tuple(p.i + start.i, p.j + start.j, double(time) / resolution, angle));
         }
         positions.push_back(std::make_tuple(target.i + start.i, target.j + start.j,
-                                            double(endTime - startTime) / resolution));
+                                            double(endTime - startTime) / resolution,
+                                            idToAngle(target.angle_id)));
     }
 };
 

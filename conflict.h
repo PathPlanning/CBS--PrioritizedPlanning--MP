@@ -26,7 +26,7 @@ struct Conflict {
     }
 
     bool operator<(const Conflict &rhs) const {
-        return minIncrease < rhs.minIncrease || minIncrease == rhs.minIncrease && time < rhs.time;
+        return minIncrease > rhs.minIncrease || minIncrease == rhs.minIncrease && time < rhs.time;
     }
 };
 

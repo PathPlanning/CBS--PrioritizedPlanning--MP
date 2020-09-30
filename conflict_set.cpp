@@ -56,7 +56,7 @@ int ConflictSet::getMatchingHeuristic() {
     int res = 0;
     for (auto conflict : cardinal) {
         if (matched.find(conflict.id1) == matched.end() && matched.find(conflict.id2) == matched.end()) {
-            ++res;
+            res += conflict.minIncrease;
             matched.insert(conflict.id1);
             matched.insert(conflict.id2);
         }

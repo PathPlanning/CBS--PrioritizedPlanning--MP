@@ -26,7 +26,7 @@
         <with_perfect_h>false</with_perfect_h>
         <with_card_conf>false</with_card_conf>
         <with_bypassing>false</with_bypassing>
-        <with_matching_h>false</with_matching_h>
+        <with_cc_graph_h>false</with_cc_graph_h>
         <mp_type>2k_neigh</mp_type>
         <neigh_degree>2</neigh_degree>
         <scale>1</scale>

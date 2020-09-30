@@ -96,5 +96,7 @@ DISTFILES += \
     Examples/empty_single_log.xml \
     Examples/empty_single_pointwise.xml \
     Examples/empty_single_pointwise_log.xml \
+    Examples/trajectories_moving.xml \
     README-RU.md \
-    README.md
+    README.md \
+    mp_example.png

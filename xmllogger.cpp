@@ -182,14 +182,14 @@ void XmlLogger::writeToLogAgentsPaths(const AgentSet& agentSet,
         pathElement->SetAttribute(CNS_TAG_ATTR_PATH_FOUND, "true");
 
         for (int j = 1; j < agentsPaths[i].size(); ++j) {
-            std::vector<std::tuple<double, double, double>> positions;
+            std::vector<std::tuple<double, double, double, double>> positions;
             auto pr = mp.getPrimitive(agentsPaths[i][j].primitiveId);
             if (breakPrimitives && agentsPaths[i][j - 1] != agentsPaths[i][j]) {
                 pr.getPositions(positions, agentsPaths[i][j - 1],
                         agentsPaths[i][j - 1].g, agentsPaths[i][j].g, step, 100);
             } else {
-                positions = {std::make_tuple(agentsPaths[i][j - 1].i, agentsPaths[i][j - 1].j, 0),
-                             std::make_tuple(agentsPaths[i][j].i, agentsPaths[i][j].j, pr.duration)};
+                positions = {std::make_tuple(agentsPaths[i][j - 1].i, agentsPaths[i][j - 1].j, 0, Primitive::idToAngle(agentsPaths[i][j - 1].angleId)),
+                             std::make_tuple(agentsPaths[i][j].i, agentsPaths[i][j].j, pr.duration, Primitive::idToAngle(agentsPaths[i][j].angleId))};
             }
 
             for (int k = 0; k < positions.size() - 1; ++k) {
@@ -201,6 +201,8 @@ void XmlLogger::writeToLogAgentsPaths(const AgentSet& agentSet,
                 sectionElement->SetAttribute(CNS_TAG_ATTR_STARTY, curPoint.i / scale);
                 sectionElement->SetAttribute(CNS_TAG_ATTR_GOALX, nextPoint.j / scale);
                 sectionElement->SetAttribute(CNS_TAG_ATTR_GOALY, nextPoint.i / scale);
+                sectionElement->SetAttribute(CNS_TAG_ATTR_STARTH, std::get<3>(positions[k]) * 180 / CN_PI);
+                sectionElement->SetAttribute(CNS_TAG_ATTR_GOALH, std::get<3>(positions[k + 1]) * 180 / CN_PI);
                 sectionElement->SetAttribute(CNS_TAG_ATTR_DUR, std::get<2>(positions[k + 1]) - std::get<2>(positions[k]));
                 pathElement->InsertEndChild(sectionElement);
             }

@@ -23,9 +23,10 @@ The main file contains two sections `map` and `options`:
     1. astar - algorithm [A*](https://www.cs.auckland.ac.nz/courses/compsci709s2c/resources/Mike.d/astarNilsson.pdf)
     2. sipp - algorithm [SIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875)
 - with_perfect_h - find the shortest paths from all cells to agents goal positions to compute perfect heuristic for A* method (`true` or `false`). Optional parameter, default value is false
-- with_card_conf - use cardinal conflicts (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`, considered for CBS and ECBS algorithms. Optional parameter, default value is false
+- with_card_conf - use cardinal conflicts (described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Cardinal conflicts are considered in the descending order of minimal cost increase required to eliminate the conflict. If these values are equal, conflicts are considered in ascending order of their appearance time. Semi-cardinal and non-cardinal conflicts, as usual, are considred after cardinal conflicts in ascending order of their appearance time. Can be `true` or `false`. Optional parameter, default value is false
+
 - with_bypassing - use conflict bypassing (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`. Optional parameter, default value is false
-- with_matching_h - compute heuristic on vertices of constraint tree in CBS, based on maximal matching in cardinal conflicts graph. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps18a.pdf) as ICBS-h1, can be `true` or `false`. Optional parameter, default value is false
+- with_cc_graph_h - compute heuristic on vertices of constraint tree in CBS, based on maximal matching in cardinal conflicts graph. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps18a.pdf) as ICBS-h1 (except that in this case a weighted graph is considered with the weights of the edges equal to the minimal cost increase required to eliminate the conflict). Can be `true` or `false`. Optional parameter, default value is false
 
 - mp_type - type of motion primitives to use. Can take following values:
     1. 2k_neigh - agents are moving on [2<sup>k</sup> neighborhood grid](https://jair.org/index.php/jair/article/download/11383/26555/) (where k equals to neigh_degree parameter) with constant speed and time of transition through an edge equals to its length. Also no rotate primitives are used and all turn are made instantly
@@ -70,7 +71,11 @@ File contains one or more section tags. Every section corresponds to one agent o
 - v0, v1 - initial and final speed of an agent
 - phi0, phif - initial and final orientation of an agent (in degrees)
 
-Values v0, v1, phi0 and phif are used only to check correctness of transition between the states (agent can execute the primitive only if its current orientation and speed are equal to the phi0 and v0 values in this primitive, rotates are possible only if current speed is equal 0), actual speed and orientation of the agent depend only on the coefficients. The time_finish tags describe rotate primitives and contain only id, Tf, phi0 and phif attributes. To simulate 2k_neigh primitives-like behaviour (speed is not considered and all rotates are made instantly) one should remove all time_finish tags, put all primitives in one section and make all v0, v1, phi0, phif values equal 0. [Example](Examples/trajectories_moving.xml) of primitives description with turns. [Example](Examples/trajectories_moving_no_turns.xml) of primitives description without turns.
+It should be noted, that actual speed and orientation of the agent depend only on the coefficients a<sub>i</sub> and b<sub>i</sub>, while the values v0, v1, phi0 and phif are used only to check correctness of transition between the states (agent can execute the primitive only if its current orientation and speed are equal to the phi0 and v0 values in this primitive, rotates are possible only if current speed is equal 0). The time_finish tags describe rotate primitives and contain only id, Tf, phi0 and phif attributes. To simulate 2k_neigh primitives-like behaviour (speed is not considered and all rotates are made instantly) one should remove all time_finish tags, put all primitives in one section and make all v0, v1, phi0, phif values equal 0.
+
+On the image below one can see the example of the set of motion primitives:
+![](mp_example.png)
+Description examples for this set [with turns](Examples/trajectories_moving.xml) and [without turns](Examples/trajectories_moving_no_turns.xml) are provided in the Examples directory.
 
 ## Output data
 Output file contains `map` and `options` sections, similar to the input file, and also the `log` section with results of the execution. This section contains the `mapfilename` tag and several other tags depending on the value of single_execution and aggregated_results parameters.
@@ -105,6 +110,7 @@ If single_execution=`true`, following tags are created (tag aggregated_results i
     - id - section id
     - start.x, start.y - agent position before taking action
     - goal.x, goal.y - agent position after taking action
+    - start.heading, goal.heading - agent heading before and after taking action (in degrees)
     - duration - duration of the action
 
 [Example](Examples/empty_single_log.xml) of output file for this mode with pointwise_output = `false`. [Example](Examples/empty_single_log_pointwise.xml) of output file for this mode with pointwise_output = `true`.
