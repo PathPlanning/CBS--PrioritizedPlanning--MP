@@ -74,7 +74,9 @@ File contains one or more section tags. Every section corresponds to one agent o
 It should be noted, that actual speed and orientation of the agent depend only on the coefficients a<sub>i</sub> and b<sub>i</sub>, while the values v0, v1, phi0 and phif are used only to check correctness of transition between the states (agent can execute the primitive only if its current orientation and speed are equal to the phi0 and v0 values in this primitive, rotates are possible only if current speed is equal 0). The time_finish tags describe rotate primitives and contain only id, Tf, phi0 and phif attributes. To simulate 2k_neigh primitives-like behaviour (speed is not considered and all rotates are made instantly) one should remove all time_finish tags, put all primitives in one section and make all v0, v1, phi0, phif values equal 0.
 
 On the image below one can see the example of the set of motion primitives:
+
 ![](mp_example.png)
+
 Description examples for this set [with turns](Examples/trajectories_moving.xml) and [without turns](Examples/trajectories_moving_no_turns.xml) are provided in the Examples directory.
 
 ## Output data
