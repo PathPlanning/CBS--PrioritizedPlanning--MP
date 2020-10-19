@@ -6,27 +6,30 @@
 #include "node.h"
 #include "map.h"
 #include "search_queue.h"
+#include "motion_primitives.h"
+#include <boost/icl/interval_map.hpp>
 
 class ConflictAvoidanceTable
 {
 public:
-    void addNode(const Node &node);
-    void addEdge(const Node &node, const Node &prev);
-    void removeNode(const Node &node);
-    void removeEdge(const Node &node, const Node &prev);
+    void addCell(const Cell &cell);
     void addAgentPath(const std::list<Node>::const_iterator& start,
-                      const std::list<Node>::const_iterator& end);
+                      const std::list<Node>::const_iterator& end,
+                      const Primitives *mp);
+    void removeCell(const Cell &cell);
     void removeAgentPath(const std::list<Node>::const_iterator& start,
-                         const std::list<Node>::const_iterator& end);
-    int getAgentsCount(const Node &node) const;
+                         const std::list<Node>::const_iterator& end,
+                         const Primitives *mp);
     int getFirstSoftConflict(const Node & node, int startTime, int endTime) const;
-    int getFutureConflictsCount(const Node & node, int time) const;
-    void getSoftConflictIntervals(std::vector<std::pair<int, int>> &res, const Node & node, const Node &prevNode,
-                                                          int startTime, int endTime, bool binary) const;
+    void getSoftConflictIntervals(std::vector<std::pair<int, int>> &res, const Node & node,
+                                  int startTime, int endTime, int duration, bool firstCell) const;
+    void getCells(std::vector<Cell> &cells,
+                  const std::list<Node>::const_iterator& start,
+                  const std::list<Node>::const_iterator& end,
+                  const Primitives *mp);
 
 private:
-    std::map<std::tuple<int, int, int>, int> nodeAgentsCount;
-    std::map<std::tuple<int, int, int, int, int>, int> edgeAgentsCount;
+    std::map<std::pair<int, int>, boost::icl::interval_map<int, int>> intervals;
 };
 
 #endif // CONFLICTAVOIDANCETABLE_H

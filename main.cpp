@@ -1,5 +1,6 @@
 #include "mission.h"
 #include "motion_primitives.h"
+#include <boost/icl/interval_set.hpp>
 
 int main(int argc, char* argv[])
 {

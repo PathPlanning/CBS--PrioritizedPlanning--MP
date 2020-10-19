@@ -15,12 +15,11 @@ public:
 
 protected:
     void splitBySoftConflicts(std::vector<std::pair<int, int>> &softConflictIntervals,
-                              const NodeType & node, const NodeType & prevNode, std::pair<int, int> interval,
+                              int startTime, int endTime,
+                              const Primitive &pr,
                               const ConflictAvoidanceTable &CAT) override;
     bool canStay() override { return true; }
     void addStartNode(NodeType &node, const Map &map, const ConflictAvoidanceTable &CAT) override;
-    void setHC(NodeType &neigh, const NodeType &cur,
-               const ConflictAvoidanceTable &CAT, bool isGoal) override;
 };
 
 #endif // SCIPP_H

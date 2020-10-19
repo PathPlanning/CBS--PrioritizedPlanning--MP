@@ -216,15 +216,15 @@ CBSNode ConflictBasedSearch<SearchType>::createNode(const Map &map, const AgentS
 
     Agent agent = agentSet.getAgent(id1);
     if (config.withCAT || config.withFocalSearch == true) {
-        CAT.removeAgentPath(starts[id1], ends[id1]);
+        CAT.removeAgentPath(starts[id1], ends[id1], mp);
     }
 
     double oldLb = lb[id1];
     SearchResult searchResult = search->startSearch(map, agentSet, agent.getStart_i(), agent.getStart_j(),
                                                     agent.getGoal_i(), agent.getGoal_j(), 0, -1, -1,
-                                                    constraints, config.withCAT, CAT);
+                                                    agentConstraints, config.withCAT, CAT);
     if (config.withCAT || config.withFocalSearch == true) {
-        CAT.addAgentPath(starts[id1], ends[id1]);
+        CAT.addAgentPath(starts[id1], ends[id1], mp);
     }
     if (!searchResult.pathfound) {
         return CBSNode(false);
@@ -382,7 +382,7 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
                     agentFound[it->first] = true;
 
                     if (config.withCAT || config.withFocalSearch == true) {
-                        CAT.addAgentPath(starts[it->first], ends[it->first]);
+                        CAT.addAgentPath(starts[it->first], ends[it->first], mp);
                     }
                     if (config.withFocalSearch) {
                         lb[it->first] = ptr->lb[it->first];

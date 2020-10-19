@@ -5,9 +5,10 @@ ZeroSCIPP<NodeType>::~ZeroSCIPP() {}
 
 template<typename NodeType>
 void ZeroSCIPP<NodeType>::splitBySoftConflicts(std::vector<std::pair<int, int>> &softConflictIntervals,
-                                                  const NodeType & node, const NodeType & prevNode,
-                                                  std::pair<int, int> interval, const ConflictAvoidanceTable &CAT) {
-    CAT.getSoftConflictIntervals(softConflictIntervals, node, prevNode, interval.first, interval.second, true);
+                                               int startTime, int endTime,
+                                               const Primitive &pr,
+                                               const ConflictAvoidanceTable &CAT) {
+    //CAT.getSoftConflictIntervals(softConflictIntervals, node, prevNode, interval.first, interval.second, true);
 }
 
 template<typename NodeType>

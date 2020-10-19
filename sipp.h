@@ -24,7 +24,8 @@ protected:
                               int agentId, const ConstraintsSet &constraints,
                               std::vector<std::pair<int, int>> &safeIntervals);
     virtual void splitBySoftConflicts(std::vector<std::pair<int, int>> &softConflictIntervals,
-                                      const NodeType & node, const NodeType &prevNode, std::pair<int, int> interval,
+                                      int startTime, int endTime,
+                                      const Primitive &pr,
                                       const ConflictAvoidanceTable &CAT);
     virtual void setNeighG(const NodeType &cur, NodeType &neigh,
                            int agentId, const ConstraintsSet &constraints) {}

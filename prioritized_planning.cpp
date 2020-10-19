@@ -10,6 +10,7 @@ template <typename SearchType>
 PrioritizedPlanning<SearchType>::PrioritizedPlanning (SearchType *Search)
 {
     search = Search;
+    mp = Search->getMP();
 }
 
 template <typename SearchType>
@@ -57,7 +58,7 @@ MultiagentSearchResult PrioritizedPlanning<SearchType>::startSearch(const Map &m
             SearchResult sr = astar.startSearch(map, agentSet, agent.getStart_i(), agent.getStart_j(),
                                         agent.getGoal_i(), agent.getGoal_j());
             individualPaths.push_back(*sr.lppath);
-            CAT.addAgentPath(individualPaths.back().begin(), individualPaths.back().end());
+            CAT.addAgentPath(individualPaths.back().begin(), individualPaths.back().end(), mp);
         }
     }
 
@@ -75,7 +76,7 @@ MultiagentSearchResult PrioritizedPlanning<SearchType>::startSearch(const Map &m
         }
 
         if (config.lowLevel == CN_SP_ST_SCIPP || config.lowLevel == CN_SP_ST_ZSCIPP) {
-            CAT.removeAgentPath(individualPaths[i].begin(), individualPaths[i].end());
+            CAT.removeAgentPath(individualPaths[i].begin(), individualPaths[i].end(), mp);
         }
 
         Agent agent = agentSet.getAgent(i);

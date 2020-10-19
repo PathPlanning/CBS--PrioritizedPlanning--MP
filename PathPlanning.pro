@@ -20,6 +20,8 @@ win32 {
 QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
 }
 
+INCLUDEPATH += C:/boost/boost_1_62_0/
+
 SOURCES += \
     agent.cpp \
     agent_set.cpp \

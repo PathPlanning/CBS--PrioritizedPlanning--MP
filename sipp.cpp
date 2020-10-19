@@ -49,77 +49,68 @@ void SIPP<NodeType>::createSuccessorsFromNode(const NodeType &cur, NodeType &nei
                                     const ConflictAvoidanceTable &CAT, bool isGoal, Primitive &pr) {
     auto cells = pr.getCells();
     cells.back().interval.second = pr.intDuration;
-    std::vector<std::pair<int, int>> safeIntervals;
-    getCellSafeIntervals(cells.back(), cur.g, cur.endTime, agentId, constraints, safeIntervals);
-    int newg = neigh.g;
+    //std::vector<std::pair<int, int>> safeIntervals;
+    //getCellSafeIntervals(cells.back(), cur.g, cur.endTime, agentId, constraints, safeIntervals);
+
+    std::vector<std::pair<int, int>> safeIntervals = constraints.getSafeIntervals(
+                neigh.i, neigh.j, agentId,
+                cur.g + pr.intDuration,
+                addWithInfCheck(cur.endTime, pr.intDuration));
 
     for (auto interval : safeIntervals) {
-        int waitTime = std::max(interval.first, 0);
-        neigh.startTime = interval.first + cur.g + cells.back().interval.first;
-        neigh.endTime = addWithInfCheck(interval.second, cur.g + pr.intDuration);
+        neigh.startTime = interval.first;
+        neigh.endTime = interval.second;
+        int waitTime = std::max(0, neigh.startTime - cur.g - pr.intDuration);
+        int endTime = addWithInfCheck(neigh.endTime, -pr.intDuration);
 
-        std::vector<IntervalBoundary> events;
-        int safeCellsCount = 0;
-        for (int i = 0; i < cells.size() - 1; ++i) {
-            if (!constraints.hasConstraint(cells[i].i, cells[i].j, agentId)) {
-                ++safeCellsCount;
-                continue;
-            }
-
-            std::vector<std::pair<int, int>> cellSafeIntervals;
-            getCellSafeIntervals(cells[i], cur.g + waitTime, addWithInfCheck(interval.second, cur.g),
-                                 agentId, constraints, cellSafeIntervals);
-
-            for (auto cellInterval : cellSafeIntervals) {
-                if (i > 0 || cellInterval.first + waitTime <= 0) {
-                    events.push_back(IntervalBoundary(cellInterval.first + waitTime, i, false));
-                    events.push_back(IntervalBoundary(addWithInfCheck(cellInterval.second, waitTime), i, true));
+        while (waitTime != CN_INFINITY) {
+            int oldWaitTime = waitTime;
+            for (int i = 0; i < cells.size(); ++i) {
+                waitTime = constraints.getNewWaitTime(
+                            cells[i], cur.g, waitTime, endTime, agentId);
+                if (waitTime == CN_INFINITY) {
+                    break;
                 }
             }
+            if (oldWaitTime == waitTime) {
+                break;
+            }
         }
-
-        if (events.empty() && safeCellsCount == cells.size() - 1) {
-            neigh.g = newg + waitTime;
-            neigh.F = neigh.H + neigh.g;
-            successors.push_back(neigh);
+        if (waitTime == CN_INFINITY) {
             continue;
         }
 
-        std::sort(events.begin(), events.end());
-        int beg;
-        int i = 0;
-        while (i < events.size()) {
-            int curTime = events[i].time;
-            for (i; i < events.size() && events[i].time == curTime && events[i].end == false; ++i) {
-                ++safeCellsCount;
-                if (safeCellsCount == cells.size() - 1) {
-                    beg = curTime;
-                }
-            }
+        if (constraints.getFirstConstraintTime(cells[0].i, cells[0].j, cur.g, agentId) <= cur.g + waitTime) {
+            break;
+        }
 
-            for (i; i < events.size() && events[i].time == curTime; ++i) {
-                if (safeCellsCount == cells.size() - 1) {
-                    neigh.startTime = interval.first + cur.g + cells.back().interval.first;
-                    neigh.endTime = addWithInfCheck(interval.second, cur.g + pr.intDuration);
-                    neigh.g = newg + std::max(beg, waitTime);
-                    neigh.F = neigh.H + neigh.g;
-                    successors.push_back(neigh);
-                    break;
-                }
-                --safeCellsCount;
+        int startTime = cur.g + waitTime;
+        for (auto cell : cells) {
+            int constraintTime = constraints.getFirstConstraintTime(cell.i, cell.j,
+                                                                    startTime + cell.interval.first,
+                                                                    agentId);
+            if (constraintTime != CN_INFINITY) {
+                endTime = std::min(endTime, constraintTime - cell.interval.second - 1);
             }
-            if (i < events.size() && events[i].time == curTime) {
-                break;
-            }
+        }
+
+        std::vector<std::pair<int, int>> softConflictIntervals;
+        splitBySoftConflicts(softConflictIntervals, startTime, endTime, pr, CAT);
+        for (auto softConflictInterval : softConflictIntervals) {
+            neigh.g = softConflictInterval.first + pr.intDuration;
+            neigh.F = neigh.g + neigh.H;
+            neigh.conflictsCount = softConflictInterval.second;
+            successors.push_back(neigh);
         }
     }
 }
 
 template<typename NodeType>
 void SIPP<NodeType>::splitBySoftConflicts(std::vector<std::pair<int, int>> &softConflictIntervals,
-                                          const NodeType & node, const NodeType & prevNode, std::pair<int, int> interval,
+                                          int startTime, int endTime,
+                                          const Primitive &pr,
                                           const ConflictAvoidanceTable &CAT) {
-    softConflictIntervals.push_back(std::make_pair(interval.first, 0));
+    softConflictIntervals.push_back(std::make_pair(startTime, 0));
 }
 
 template<typename NodeType>

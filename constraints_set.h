@@ -3,6 +3,7 @@
 
 #include "constraint.h"
 #include "gl_const.h"
+#include "motion_primitives.h"
 #include <set>
 #include <vector>
 #include <algorithm>
@@ -25,6 +26,7 @@ public:
     int getFirstConstraintTime(int i, int j, int startTime, int agentId) const;
     std::vector<std::pair<int, int>> getSafeIntervals(int i, int j, int agentId,
                                                       int startTime, int endTime, int duration = 1) const;
+    int getNewWaitTime(const Cell &cell, int startTime, int waitTime, int endTime, int agentId) const;
 
     bool hasConstraint(int i, int j, int agentId) const;
     bool hasNodeConstraint(int i, int j, int time, int agentId, int duration = 1) const;

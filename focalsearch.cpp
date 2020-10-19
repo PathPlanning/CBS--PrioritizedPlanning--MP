@@ -63,16 +63,16 @@ template<typename NodeType>
 void FocalSearch<NodeType>::setHC(NodeType &neigh, const NodeType &cur,
                                   const ConflictAvoidanceTable &CAT, bool isGoal) {
     neigh.hc = cur.hc + neigh.conflictsCount;
-    if (isGoal) {
+    /*if (isGoal) {
         addFutureConflicts(neigh, CAT);
-    }
+    }*/
 }
 
-template<typename NodeType>
+/*template<typename NodeType>
 void FocalSearch<NodeType>::addFutureConflicts(NodeType &neigh, const ConflictAvoidanceTable &CAT) {
     neigh.futureConflictsCount = CAT.getFutureConflictsCount(neigh, neigh.g);
     neigh.hc += neigh.futureConflictsCount;
-}
+}*/
 
 template class FocalSearch<FSNode>;
 template class FocalSearch<SCIPPNode>;

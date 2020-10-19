@@ -24,7 +24,8 @@ public:
     MultiagentSearchResult startSearch(const Map &map, const Config &config, AgentSet &AgentSet) override;
 
 private:
-    SearchType*                      search;
+    Primitives*                     mp;
+    SearchType*                     search;
 };
 
 #endif // PRIORITIZEDPLANNING_H

@@ -1,4 +1,5 @@
 #include "constraints_set.h"
+#include "motion_primitives.h"
 #include <iostream>
 
 void ConstraintsSet::addNodeConstraint(int i, int j, int time, int agentId) {
@@ -91,6 +92,26 @@ int ConstraintsSet::getFirstConstraintTime(int i, int j, int startTime, int agen
         res = constraint->time;
     }
     return res;
+}
+
+int ConstraintsSet::getNewWaitTime(const Cell &cell, int startTime, int waitTime, int endTime, int agentId) const {
+    auto it = nodeConstraints.lower_bound(Constraint(cell.i, cell.j,
+                                                     startTime + waitTime + cell.interval.first, agentId));
+    if (it == nodeConstraints.end() || it->i != cell.i || it->j != cell.j ||
+            it->time > startTime + waitTime + cell.interval.second) {
+        return waitTime;
+    }
+    for (it; it != nodeConstraints.end() && it->i == cell.i && it->j == cell.j &&
+         it->time + 1 - cell.interval.first <= endTime; ++it) {
+        if (it->time > startTime + waitTime + cell.interval.second) {
+            return waitTime;
+        }
+        waitTime = it->time + 1 - startTime - cell.interval.first;
+    }
+    if (it == nodeConstraints.end() || it->i != cell.i || it->j != cell.j) {
+        return waitTime;
+    }
+    return CN_INFINITY;
 }
 
 std::vector<std::pair<int, int>> ConstraintsSet::getSafeIntervals(int i, int j, int agentId,

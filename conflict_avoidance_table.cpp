@@ -1,80 +1,85 @@
 #include "conflict_avoidance_table.h"
+#include "motion_primitives.h"
 
-void ConflictAvoidanceTable::addNode(const Node &node) {
-    auto tuple = std::make_tuple(node.i, node.j, node.g);
-    if (nodeAgentsCount.find(tuple) == nodeAgentsCount.end()) {
-        nodeAgentsCount[tuple] = 1;
-    } else {
-        ++nodeAgentsCount[tuple];
+void ConflictAvoidanceTable::getCells(std::vector<Cell> &cells,
+                                      const std::list<Node>::const_iterator& start,
+                                      const std::list<Node>::const_iterator& end,
+                                      const Primitives *mp) {
+    int lastNodeStart = 0;
+    for (auto it = start; it != end; ++it) {
+        if (it != start) {
+            auto pr = mp->getPrimitive(it->primitiveId);
+            pr.setSource(std::prev(it)->i, std::prev(it)->j);
+            int startTime = it->g - pr.intDuration;
+            pr.setStartTime(startTime);
+
+            for (int i = 0; i < pr.cells.size() - 1; ++i) {
+                if (i == 0) {
+                    pr.cells[i].interval.first = lastNodeStart;
+                }
+                cells.push_back(pr.cells[i]);
+            }
+
+            if (std::next(it) == end) {
+                if (pr.cells.size() == 1) {
+                    pr.cells.back().interval.first = lastNodeStart;
+                }
+                pr.cells.back().interval.second = CN_INFINITY;
+                cells.push_back(pr.cells.back());
+            } else if (pr.cells.size() > 1) {
+                lastNodeStart = pr.cells.back().interval.first + startTime;
+            }
+        }
     }
 }
 
-void ConflictAvoidanceTable::addEdge(const Node &node, const Node &prev) {
-    auto tuple = std::make_tuple(prev.i, prev.j, node.i, node.j, node.g);
-    if (edgeAgentsCount.find(tuple) == edgeAgentsCount.end()) {
-        edgeAgentsCount[tuple] = 1;
-    } else {
-        ++edgeAgentsCount[tuple];
+void ConflictAvoidanceTable::addCell(const Cell &cell) {
+    auto pair = std::make_pair(cell.i, cell.j);
+    if (intervals.find(pair) == intervals.end()) {
+        intervals[pair] = boost::icl::interval_map<int, int>();
     }
+    boost::icl::interval<int>::type interval(cell.interval.first, cell.interval.second + 1);
+    intervals[pair] += std::make_pair(interval, 1);
 }
 
 void ConflictAvoidanceTable::addAgentPath(const std::list<Node>::const_iterator& start,
-                                          const std::list<Node>::const_iterator& end) {
-    for (auto it = start; it != end; ++it) {
-        addNode(*it);
-        if (it != start && *it != *std::prev(it)) {
-            addEdge(*it, *std::prev(it));
-        }
+                                          const std::list<Node>::const_iterator& end,
+                                          const Primitives *mp) {
+    std::vector<Cell> cells;
+    getCells(cells, start, end, mp);
+    for (auto cell : cells) {
+        addCell(cell);
     }
 }
 
-void ConflictAvoidanceTable::removeNode(const Node &node) {
-    auto tuple = std::make_tuple(node.i, node.j, node.g);
-    if (nodeAgentsCount[tuple] == 1) {
-        nodeAgentsCount.erase(tuple);
-    } else {
-        --nodeAgentsCount[tuple];
-    }
-}
-
-void ConflictAvoidanceTable::removeEdge(const Node &node, const Node &prev) {
-    auto tuple = std::make_tuple(prev.i, prev.j, node.i, node.j, node.g);
-    if (edgeAgentsCount[tuple] == 1) {
-        edgeAgentsCount.erase(tuple);
-    } else {
-        --edgeAgentsCount[tuple];
-    }
+void ConflictAvoidanceTable::removeCell(const Cell &cell) {
+    auto pair = std::make_pair(cell.i, cell.j);
+    boost::icl::interval<int>::type interval(cell.interval.first, cell.interval.second + 1);
+    intervals[pair] -= std::make_pair(interval, 1);
 }
 
 void ConflictAvoidanceTable::removeAgentPath(const std::list<Node>::const_iterator& start,
-                                             const std::list<Node>::const_iterator& end) {
-    for (auto it = start; it != end; ++it) {
-        removeNode(*it);
-        if (it != start && *it != *std::prev(it)) {
-            removeEdge(*it, *std::prev(it));
-        }
+                                             const std::list<Node>::const_iterator& end,
+                                             const Primitives *mp) {
+    std::vector<Cell> cells;
+    getCells(cells, start, end, mp);
+    for (auto cell : cells) {
+        removeCell(cell);
     }
-}
-
-int ConflictAvoidanceTable::getAgentsCount(const Node &node) const {
-    int res = 0;
-    auto tuple = std::make_tuple(node.i, node.j, node.g);
-    if (nodeAgentsCount.find(tuple) != nodeAgentsCount.end()) {
-        res = nodeAgentsCount.at(tuple);
-    }
-    return res;
 }
 
 int ConflictAvoidanceTable::getFirstSoftConflict(const Node & node, int startTime, int endTime) const {
-    auto nodeIt = nodeAgentsCount.lower_bound(std::make_tuple(node.i, node.j, startTime));
-    if (nodeIt != nodeAgentsCount.end() && std::get<0>(nodeIt->first) == node.i
-            && std::get<1>(nodeIt->first) == node.j && std::get<2>(nodeIt->first) <= endTime) {
-        return std::get<2>(nodeIt->first);
+    auto pair = std::make_pair(node.i, node.j);
+    if (intervals.find(pair) != intervals.end()) {
+        auto it = intervals.at(pair).find(boost::icl::interval<int>::type(startTime, endTime + 1));
+        if (it != intervals.at(pair).end() && it->first.lower() <= endTime) {
+            return std::max(startTime, it->first.lower());
+        }
     }
     return -1;
 }
 
-int ConflictAvoidanceTable::getFutureConflictsCount(const Node & node, int time) const {
+/*int ConflictAvoidanceTable::getFutureConflictsCount(const Node & node, int time) const {
     int res = 0;
     auto it = nodeAgentsCount.upper_bound(std::make_tuple(node.i, node.j, time));
     for (; it != nodeAgentsCount.end() && std::get<0>(it->first) == node.i
@@ -82,47 +87,37 @@ int ConflictAvoidanceTable::getFutureConflictsCount(const Node & node, int time)
         res += it->second;
     }
     return res;
-}
+}*/
 
-void ConflictAvoidanceTable::getSoftConflictIntervals(std::vector<std::pair<int, int>> &res,
-                                                      const Node & node, const Node &prevNode,
-                                                      int startTime, int endTime, bool binary) const {
-    std::map<int, int> agentsCount;
-    auto nodeIt = nodeAgentsCount.lower_bound(std::make_tuple(node.i, node.j, startTime));
-    auto nodeEnd = nodeAgentsCount.upper_bound(std::make_tuple(node.i, node.j, endTime));
-    for (nodeIt; nodeIt != nodeEnd; ++nodeIt) {
-        agentsCount[std::get<2>(nodeIt->first)] = nodeIt->second;
+void ConflictAvoidanceTable::getSoftConflictIntervals(std::vector<std::pair<int, int>> &res, const Node & node,
+                                                      int startTime, int endTime, int duration, bool firstCell) const {
+    auto pair = std::make_pair(node.i, node.j);
+    if (intervals.find(pair) == intervals.end()) {
+        res.push_back(std::make_pair(startTime, 0));
+        return;
     }
 
-    auto edgeIt = edgeAgentsCount.lower_bound(std::make_tuple(node.i, node.j, prevNode.i, prevNode.j, startTime));
-    auto edgeEnd = edgeAgentsCount.upper_bound(std::make_tuple(node.i, node.j, prevNode.i, prevNode.j, endTime));
-    for (edgeIt; edgeIt != edgeEnd; ++edgeIt) {
-        int time = std::get<4>(edgeIt->first);
-        if (agentsCount.find(time) == agentsCount.end()) {
-            agentsCount[std::get<4>(edgeIt->first)] = 0;
+    int start = startTime, count = 0;
+    int prevUpper = startTime;
+    auto it = intervals.at(pair).find(boost::icl::interval<int>::type(startTime, endTime + 1));
+    auto end = intervals.at(pair).end();
+    for (it; it != end; ++it) {
+        boost::icl::interval<int>::type interval = it->first;
+        if (interval.lower() > endTime + duration - 1) {
+            break;
         }
-        agentsCount[std::get<4>(edgeIt->first)] += edgeIt->second;
-    }
 
-    int count = 0, prevTime = startTime - 1, beg = -1;
-    for (auto it = agentsCount.begin(); it != agentsCount.end(); ++it) {
-        int time = it->first;
-        if (time > prevTime + 1 || count == 0 || (!binary && it->second != count)) {
-            if (beg != -1) {
-                res.push_back(std::make_pair(beg, count));
-            }
-            if (time > prevTime + 1) {
-                res.push_back(std::make_pair(prevTime + 1, 0));
-            }
-            beg = time;
-            count = it->second;
+        if (interval.lower() - prevUpper >= duration) {
+            res.push_back(std::make_pair(prevUpper, 0));
+            res.push_back(std::make_pair(interval.lower() - duration + 1, 1));
         }
-        prevTime = time;
+
+        if (res.empty()) {
+            res.push_back(std::make_pair(startTime, 1));
+        }
+        prevUpper = interval.upper();
     }
-    if (beg != -1) {
-        res.push_back(std::make_pair(beg, count));
-    }
-    if (prevTime < endTime) {
-        res.push_back(std::make_pair(prevTime + 1, 0));
+    if (prevUpper <= endTime) {
+        res.push_back(std::make_pair(prevUpper, 0));
     }
 }

@@ -104,7 +104,7 @@ public:
     std::vector<Cell> cells;
     bool operator==(const Primitive& other) { return this->id == other.id; }
     void setSize(double size) { agentSize = size; }
-    std::vector<Cell> getCells() { return cells; }
+    std::vector<Cell> getCells() const { return cells; }
     double size() {return agentSize;}
     void setSource(int i, int j)
     {
@@ -116,6 +116,15 @@ public:
         {
             c.i = i + c.i;
             c.j = j + c.j;
+        }
+    }
+
+    void setStartTime(int startTime)
+    {
+        for(auto &c:cells)
+        {
+            c.interval.first += startTime;
+            c.interval.second += startTime;
         }
     }
 
@@ -388,6 +397,16 @@ class Primitives
         }
     }
 
+    int getId() {
+        int res = 0;
+        for (auto type : {type0, type1, type2}) {
+            for (auto pr : type) {
+                res += pr.size();
+            }
+        }
+        return res;
+    }
+
     void addWaitPrimitive()
     {
         Primitive pr;
@@ -396,7 +415,7 @@ class Primitives
         pr.target.speed = 0;
         pr.target.i = 0;
         pr.target.j = 0;
-        pr.id = type0[0].size() + type1[0].size() + type2[0].size();
+        pr.id = getId();
         pr.cells.push_back(Cell(0, 0));
         pr.cells[0].interval = std::make_pair(0, 1);
         if (type2.empty()) {
