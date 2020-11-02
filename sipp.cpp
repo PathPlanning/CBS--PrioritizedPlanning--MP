@@ -1,6 +1,12 @@
 #include "sipp.h"
 
 template<typename NodeType>
+int SIPP<NodeType>::getNextConstraintTime(const NodeType& node, const ConstraintsSet &constraints, int agentId) {
+    return node.endTime;
+}
+
+
+template<typename NodeType>
 void SIPP<NodeType>::setEndTime(NodeType& node, int start_i, int start_j, int startTime, int agentId, const ConstraintsSet &constraints) {
     node.endTime = constraints.getFirstConstraintTime(start_i, start_j, startTime, agentId);
     if (node.endTime < CN_INFINITY) {

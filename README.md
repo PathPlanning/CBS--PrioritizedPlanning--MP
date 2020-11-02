@@ -22,6 +22,8 @@ The main file contains two sections `map` and `options`:
 - low_level - algorithm, applied in the low level search in CBS and ECBS algorithms. Can take following values:
     1. astar - algorithm [A*](https://www.cs.auckland.ac.nz/courses/compsci709s2c/resources/Mike.d/astarNilsson.pdf)
     2. sipp - algorithm [SIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875)
+    3. focal_search - focal search algorithm, as in original ECBS [paper](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875). Secondary heuristic is defined as number of vertex conflicts on the partial path to the current vertex
+    4. scipp - [SCIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS19/paper/viewFile/18327/17443), sub-optimal modification of SIPP algorihm.
 - with_perfect_h - find the shortest paths from all cells to agents goal positions to compute perfect heuristic for A* method (`true` or `false`). Optional parameter, default value is false
 - with_card_conf - use cardinal conflicts (described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Cardinal conflicts are considered in the descending order of minimal cost increase required to eliminate the conflict. If these values are equal, conflicts are considered in ascending order of their appearance time. Semi-cardinal and non-cardinal conflicts, as usual, are considred after cardinal conflicts in ascending order of their appearance time. Can be `true` or `false`. Optional parameter, default value is false
 
@@ -41,6 +43,8 @@ The main file contains two sections `map` and `options`:
 - agent_size - radius of an agent. Double value, must be not more than 0.5 / scale (otherwise the cells occupied during the movement are computed incorrectly). Optional parameter, default value is 0.5
 
 - time_resolution - parameter, used to tansform primitive duration to the integer number of timesteps. Time of transition through an edge equals to the product of its length and time_resolution rounded down. For example, if time_resolution = 1000, transition to the closest orthogonal neighbour takes 1000 timesteps, and transition to the closest diagonal neighbour takes 1414 timesteps.
+
+- focal_w - weight used in ECBS high level search and in Focal search and SCIPP low level searches for construction of the FOCAL list. In any case it is garantied that cost of the found solution will not exceed the optimal cost more than in focal_w times. Optional parameter, default value is 1.0
 
 ### Section `options` - definition of the testing parameters. Contains following tags:
 - agents_file - common prefix for the input files with agents’ description

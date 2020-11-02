@@ -134,9 +134,8 @@ void ISearch<NodeType>::findSuccessors(std::list<NodeType> &successors,
         std::vector<Primitive> turns;
         mp.getTurns(turns, curNode.angleId);
         NodeType neigh = curNode;
-        int constraintTime = constraints.getFirstConstraintTime(curNode.i, curNode.j, curNode.g, agentId);
         for (auto turn : turns) {
-            if (curNode.g + turn.intDuration < constraintTime) {
+            if (curNode.g + turn.intDuration < getNextConstraintTime(neigh, constraints, agentId)) {
                 neigh.primitiveId = turn.id;
                 neigh.g = curNode.g + turn.intDuration;
                 neigh.F = neigh.g + neigh.H;
@@ -184,6 +183,12 @@ template<typename NodeType>
 void ISearch<NodeType>::setEndTime(NodeType& node, int start_i, int start_j, int startTime, int agentId, const ConstraintsSet &constraints) {
     return;
 }
+
+template<typename NodeType>
+int ISearch<NodeType>::getNextConstraintTime(const NodeType& node, const ConstraintsSet &constraints, int agentId) {
+    return constraints.getFirstConstraintTime(node.i, node.j, node.g, agentId);
+}
+
 
 template<typename NodeType>
 bool ISearch<NodeType>::checkGoal(const NodeType &cur, int goalTime, int agentId, const ConstraintsSet &constraints) {

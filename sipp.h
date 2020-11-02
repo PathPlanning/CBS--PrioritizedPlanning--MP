@@ -32,6 +32,7 @@ protected:
     virtual void addOptimalNode(const NodeType& cur, NodeType &neigh, std::pair<int, int> interval,
                                 int agentId, const ConstraintsSet &constraints,
                                 std::list<NodeType> &successors) {}
+    int getNextConstraintTime(const NodeType& node, const ConstraintsSet &constraints, int agentId);
     virtual bool getOptimal(const NodeType &neigh) { return false; }
     virtual void setOptimal(NodeType &neigh, bool val) {}
     virtual bool checkSuboptimal(const NodeType &cur) { return true; }

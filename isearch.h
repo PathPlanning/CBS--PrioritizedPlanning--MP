@@ -68,6 +68,7 @@ class ISearch
         virtual void makePrimaryPath(Node &curNode, int endTime);//Makes path using back pointers
         virtual void makeSecondaryPath(const Map &map);//Makes another type of path(sections or points)
         virtual void setEndTime(NodeType& node, int start_i, int start_j, int startTime, int agentId, const ConstraintsSet &constraints);
+        virtual int getNextConstraintTime(const NodeType& node, const ConstraintsSet &constraints, int agentId);
         virtual void setHC(NodeType &neigh, const NodeType &cur,
                            const ConflictAvoidanceTable &CAT, bool isGoal) {}
         virtual void createSuccessorsFromNode(const NodeType &cur, NodeType &neigh, std::list<NodeType> &successors,
