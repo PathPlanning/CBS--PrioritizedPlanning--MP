@@ -106,6 +106,7 @@ void SIPP<NodeType>::createSuccessorsFromNode(const NodeType &cur, NodeType &nei
             neigh.g = softConflictInterval.first + pr.intDuration;
             neigh.F = neigh.g + neigh.H;
             neigh.conflictsCount = softConflictInterval.second;
+            this->setHC(neigh, cur, CAT, false);
             successors.push_back(neigh);
         }
     }

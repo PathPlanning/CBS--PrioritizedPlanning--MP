@@ -16,7 +16,7 @@ long long ISearch<NodeType>::T = 0;
 template<typename NodeType>
 SearchResult ISearch<NodeType>::startSearch(const Map &map, const AgentSet &agentSet,
                                   int start_i, int start_j, int goal_i, int goal_j,
-                                  int startTime, int goalTime, int maxTime,
+                                  int startAngleId, int goalAngleId, int startTime, int goalTime, int maxTime,
                                   const ConstraintsSet &constraints,
                                   bool withCAT, const ConflictAvoidanceTable &CAT)
 {
@@ -43,6 +43,9 @@ SearchResult ISearch<NodeType>::startSearch(const Map &map, const AgentSet &agen
     cur = NodeType(start_i, start_j, nullptr, startTime,
                    computeHFromCellToCell(start_i, start_j, goal_i, goal_j));
     setEndTime(cur, start_i, start_j, startTime, agentId, constraints);
+    if (mp.withTurns()) {
+        cur.angleId = startAngleId;
+    }
     addStartNode(cur, map, CAT);
     addSuboptimalNode(cur, map, CAT);
 
@@ -60,7 +63,7 @@ SearchResult ISearch<NodeType>::startSearch(const Map &map, const AgentSet &agen
         close[cur.convolution(map.getMapWidth(), map.getMapHeight(), withTime)] = cur;
 
         NodeType *curPtr = &(close.find(cur.convolution(map.getMapWidth(), map.getMapHeight(), withTime))->second);
-        if (cur.i == goal_i && cur.j == goal_j) {
+        if (cur.i == goal_i && cur.j == goal_j && (goalAngleId == -1 || !mp.withTurns() || cur.angleId == goalAngleId)) {
             if (!constraints.hasFutureConstraint(cur.i, cur.j, cur.g, agentId) &&
                 checkGoal(cur, goalTime, agentId, constraints)) {
                 sresult.pathfound = true;
@@ -118,8 +121,12 @@ void ISearch<NodeType>::findSuccessors(std::list<NodeType> &successors,
                                         const ConstraintsSet &constraints,
                                         bool withCAT, const ConflictAvoidanceTable &CAT)
 {
-    std::vector<Primitive> primitives;
+    std::vector<Primitive> primitives, turns;
     mp.getPrimitives(primitives, curNode.i, curNode.j, curNode.angleId, curNode.speed, map);
+    if (curNode.speed == 0) {
+        mp.getTurns(turns, curNode.angleId);
+        primitives.insert(primitives.end(), turns.begin(), turns.end());
+    }
     for (auto pr : primitives) {
         pr.setSource(curNode.i, curNode.j);
         int newi = pr.target.i;
@@ -129,20 +136,6 @@ void ISearch<NodeType>::findSuccessors(std::list<NodeType> &successors,
         NodeType neigh(newi, newj, nullptr, newg, newh, 0, pr.id, pr.target.angle_id, pr.target.speed);
         createSuccessorsFromNode(curNode, neigh, successors, agentId, constraints, CAT,
                                  neigh.i == goal_i && neigh.j == goal_j, pr);
-    }
-    if (curNode.speed == 0) {
-        std::vector<Primitive> turns;
-        mp.getTurns(turns, curNode.angleId);
-        NodeType neigh = curNode;
-        for (auto turn : turns) {
-            if (curNode.g + turn.intDuration < getNextConstraintTime(neigh, constraints, agentId)) {
-                neigh.primitiveId = turn.id;
-                neigh.g = curNode.g + turn.intDuration;
-                neigh.F = neigh.g + neigh.H;
-                neigh.angleId = turn.target.angle_id;
-                successors.push_back(neigh);
-            }
-        }
     }
 }
 

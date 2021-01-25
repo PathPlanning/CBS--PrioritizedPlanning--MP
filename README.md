@@ -17,18 +17,18 @@ The main file contains two sections `map` and `options`:
 
 ### Section `algorithm` - definition of the algorihm parameters. Contains following tags:
 - planner - algorithm to be used. Can take following values:
-    1. cbs - Conflict based search
+    1. cbs - Conflict based search. Can be used only with astar and sipp low level searches
     2. ecbs - Enhanced conflict based search. In the high level search secondary heuristic h3 from the [article](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875) is used. Low level search depends on the low_level option
 - low_level - algorithm, applied in the low level search in CBS and ECBS algorithms. Can take following values:
     1. astar - algorithm [A*](https://www.cs.auckland.ac.nz/courses/compsci709s2c/resources/Mike.d/astarNilsson.pdf)
     2. sipp - algorithm [SIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875)
     3. focal_search - focal search algorithm, as in original ECBS [paper](https://www.aaai.org/ocs/index.php/SOCS/SOCS14/paper/viewFile/8911/8875). Secondary heuristic is defined as number of vertex conflicts on the partial path to the current vertex
     4. scipp - [SCIPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS19/paper/viewFile/18327/17443), sub-optimal modification of SIPP algorihm.
-- with_perfect_h - find the shortest paths from all cells to agents goal positions to compute perfect heuristic for A* method (`true` or `false`). Optional parameter, default value is false
+- with_perfect_h - find the shortest paths from all cells to agents goal positions to compute perfect heuristic for A* method (`true` or `false`). When motion primitives with turns are used, perfect heuristic does not consider initial and final orientation (i.e. first and last rotations are not included). Optional parameter, default value is false
 - with_card_conf - use cardinal conflicts (described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Cardinal conflicts are considered in the descending order of minimal cost increase required to eliminate the conflict. If these values are equal, conflicts are considered in ascending order of their appearance time. Semi-cardinal and non-cardinal conflicts, as usual, are considred after cardinal conflicts in ascending order of their appearance time. Can be `true` or `false`. Optional parameter, default value is false
 
 - with_bypassing - use conflict bypassing (as described [here](https://pdfs.semanticscholar.org/c072/38579a95c424707dbe855efba189cce68650.pdf)). Can be `true` or `false`. Optional parameter, default value is false
-- with_cc_graph_h - compute heuristic on vertices of constraint tree in CBS, based on maximal matching in cardinal conflicts graph. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps18a.pdf) as ICBS-h1 (except that in this case a weighted graph is considered with the weights of the edges equal to the minimal cost increase required to eliminate the conflict). Can be `true` or `false`. Optional parameter, default value is false
+- with_ct_tree_h - compute heuristic on vertices of constraint tree in CBS, based on maximal matching in cardinal conflicts graph. Described [here](http://idm-lab.org/bib/abstracts/papers/icaps18a.pdf) as ICBS-h1 (except that in this case a weighted graph is considered with the weights of the edges equal to the minimal cost increase required to eliminate the conflict). Can be `true` or `false`. Optional parameter, default value is false
 
 - mp_type - type of motion primitives to use. Can take following values:
     1. 2k_neigh - agents are moving on [2<sup>k</sup> neighborhood grid](https://jair.org/index.php/jair/article/download/11383/26555/) (where k equals to neigh_degree parameter) with constant speed and time of transition through an edge equals to its length. Also no rotate primitives are used and all turn are made instantly
@@ -65,6 +65,8 @@ For each agent its own tag `agent` is provided with following attributes:
 - id - agent’s id
 - start_i, start_j - coordinates of agent’s start position (cells are numbered from 0, cell (0, 0) is in the left upper corner of the map, the first coordinate corresponds to the row number and the second to the column number)
 - goal_i, goal_j - coordinates of agent’s goal position
+- start_angle_id - agent’s initial heading id. Id 0 corresponds to north orientation, other orientations are numbered clockwise. Optional parameter, default value is 0.
+- goal_angle_id - agent’s goal heading id. If parameter is unspecified or equal -1, agent will stop with the same heading as it was when it arrived to the goal position
 
 ### Primitive description
 File contains one or more section tags. Every section corresponds to one agent orientation. Every section tag contains coeff and time_finish tags describing moving and rotation primitives. coeff tags have following attributes:

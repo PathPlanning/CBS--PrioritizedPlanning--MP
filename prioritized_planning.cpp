@@ -56,7 +56,7 @@ MultiagentSearchResult PrioritizedPlanning<SearchType>::startSearch(const Map &m
         for (int i = 0; i < agentSet.getAgentCount(); ++i) {
             Agent agent = agentSet.getAgent(i);
             SearchResult sr = astar.startSearch(map, agentSet, agent.getStart_i(), agent.getStart_j(),
-                                        agent.getGoal_i(), agent.getGoal_j());
+                                        agent.getGoal_i(), agent.getGoal_j(), agent.getStartAngleId(), agent.getGoalAngleId());
             individualPaths.push_back(*sr.lppath);
             CAT.addAgentPath(individualPaths.back().begin(), individualPaths.back().end(), mp);
         }
@@ -82,6 +82,7 @@ MultiagentSearchResult PrioritizedPlanning<SearchType>::startSearch(const Map &m
         Agent agent = agentSet.getAgent(i);
         SearchResult searchResult = search->startSearch(map, agentSet, agent.getStart_i(), agent.getStart_j(),
                                                         agent.getGoal_i(), agent.getGoal_j(),
+                                                        agent.getStartAngleId(), agent.getGoalAngleId(),
                                                         0, -1, maxDepth + map.getEmptyCellCount(),
                                                         constraints, false, CAT);
 

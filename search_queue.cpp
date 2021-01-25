@@ -11,7 +11,7 @@ bool SearchQueue<NodeType>::insert(const Map& map, NodeType node, bool withTime,
     if (!withOld) {
         old = getByIndex(map, node, withTime);
     }
-    if (old.i == -1 || cmp(node, old)) {
+    if (old.i == -1 || node < old) {
         if (old.i != -1) {
             sortByKey.erase(old);
         }

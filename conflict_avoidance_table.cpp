@@ -27,7 +27,7 @@ void ConflictAvoidanceTable::getCells(std::vector<Cell> &cells,
                 pr.cells.back().interval.second = CN_INFINITY;
                 cells.push_back(pr.cells.back());
             } else if (pr.cells.size() > 1) {
-                lastNodeStart = pr.cells.back().interval.first + startTime;
+                lastNodeStart = pr.cells.back().interval.first;
             }
         }
     }

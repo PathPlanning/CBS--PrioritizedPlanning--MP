@@ -154,7 +154,9 @@ void Mission::startSearch(const std::string &agentsFile)
         AgentSet curAgentSet;
         for (int j = 0; j < i; ++j) {
             Agent agent = agentSet.getAgent(j);
-            curAgentSet.addAgent(agent.getStart_i(), agent.getStart_j(), agent.getGoal_i(), agent.getGoal_j());
+            curAgentSet.addAgent(agent.getStart_i(), agent.getStart_j(),
+                                 agent.getGoal_i(), agent.getGoal_j(),
+                                 agent.getStartAngleId(), agent.getGoalAngleId());
         }
 
         multiagentSearch->clear();

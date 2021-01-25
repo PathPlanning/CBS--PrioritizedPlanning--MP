@@ -465,6 +465,14 @@ class Primitives
         }
     }
 
+    bool withTurns() {
+        return type0.size() > 1;
+    }
+
+    int orientationCount() const {
+        return type0.size();
+    }
+
     void getTurns(std::vector<Primitive> &prims, int angle_id) {
         if (type2.empty() || type2[0].empty()) {
             prims = {};

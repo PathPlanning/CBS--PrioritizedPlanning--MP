@@ -92,6 +92,7 @@ void ConflictBasedSearch<SearchType>::getConflicts(const Map &map, const AgentSe
                         agentConstraints.addConstraint(constraint);
                         SearchResult searchResult = this->search->startSearch(map, agentSet, starts[id]->i, starts[id]->j,
                                                                               std::prev(ends[id])->i, std::prev(ends[id])->j,
+                                                                              starts[id]->angleId, std::prev(ends[id])->angleId,
                                                                               0, -1, -1, agentConstraints);
                         if (!searchResult.pathfound) {
                             continue;
@@ -221,7 +222,8 @@ CBSNode ConflictBasedSearch<SearchType>::createNode(const Map &map, const AgentS
 
     double oldLb = lb[id1];
     SearchResult searchResult = search->startSearch(map, agentSet, agent.getStart_i(), agent.getStart_j(),
-                                                    agent.getGoal_i(), agent.getGoal_j(), 0, -1, -1,
+                                                    agent.getGoal_i(), agent.getGoal_j(),
+                                                    agent.getStartAngleId(), agent.getGoalAngleId(), 0, -1, -1,
                                                     agentConstraints, config.withCAT, CAT);
     if (config.withCAT || config.withFocalSearch == true) {
         CAT.addAgentPath(starts[id1], ends[id1], mp);
@@ -310,7 +312,8 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
         Astar<> astar(*search->getMP(), false);
         SearchResult searchResult;
         searchResult = astar.startSearch(map, agentSet, agent.getStart_i(), agent.getStart_j(),
-                                                        agent.getGoal_i(), agent.getGoal_j());
+                                         agent.getGoal_i(), agent.getGoal_j(),
+                                         agent.getStartAngleId(), agent.getGoalAngleId());
         if (!searchResult.pathfound) {
             std::cout << "fail" << std::endl;
         }

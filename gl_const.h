@@ -41,7 +41,7 @@
         #define CNS_TAG_WITH_PH     "with_perfect_h"
         #define CNS_TAG_CARD_CONF   "with_card_conf"
         #define CNS_TAG_BYPASSING   "with_bypassing"
-        #define CNS_TAG_WITH_MH     "with_cc_graph_h"
+        #define CNS_TAG_WITH_MH     "with_ct_tree_h"
         #define CNS_TAG_WITH_DS     "with_disjoint_splitting"
         #define CNS_TAG_FOCAL_W     "focal_w"
         #define CNS_TAG_WEIGHT      "weight"

@@ -23,7 +23,7 @@ class AgentSet
     public:
         bool readAgents(const char *FileName, int scale);
         void clear();
-        void addAgent(int start_i, int start_j, int goal_i, int goal_j);
+        void addAgent(int start_i, int start_j, int goal_i, int goal_j, int _startAngleId = 0, int _goalAngleId = -1);
         int getAgentCount() const;
         Agent getAgent(int id) const;
         int getAgentId(int i, int j) const;

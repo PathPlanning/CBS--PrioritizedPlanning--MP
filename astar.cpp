@@ -42,12 +42,19 @@ void Astar<NodeType>::getPerfectHeuristic(const Map &map, const AgentSet &agentS
         SearchQueue<Node> queue;
         std::unordered_set<int> visited;
         Node goal = Node(agentSet.getAgent(i).getGoal_i(), agentSet.getAgent(i).getGoal_j());
-        queue.insert(map, goal, false);
+
+        for (int angleId = 0; angleId < mp.orientationCount(); ++angleId) {
+            goal.angleId = angleId;
+            queue.insert(map, goal, false);
+        }
         while (!queue.empty()) {
             Node cur = queue.getFront();
             queue.erase(map, cur, false);
             visited.insert(cur.convolution(map.getMapWidth(), map.getMapHeight()));
-            perfectHeuristic[std::make_pair(cur, goal)] = cur.g;
+            auto it = perfectHeuristic.find(std::make_pair(cur, goal));
+            if (it == perfectHeuristic.end() || it->second > cur.g) {
+                perfectHeuristic[std::make_pair(cur, goal)] = cur.g;
+            }
             std::list<Node> successors;
             getNeigboursWithoutChecks(map, cur, search, successors);
             for (auto neigh : successors) {

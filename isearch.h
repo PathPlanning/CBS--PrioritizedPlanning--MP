@@ -27,6 +27,7 @@ class ISearch
         virtual ~ISearch(void);
         SearchResult startSearch(const Map &map, const AgentSet &agentSet,
                                  int start_i, int start_j, int goal_i = 0, int goal_j = 0,
+                                 int startAngleId = 0, int goalAngleId = -1,
                                  int startTime = 0, int goalTime = -1, int maxTime = -1,
                                  const ConstraintsSet &constraints = ConstraintsSet(),
                                  bool withCAT = false, const ConflictAvoidanceTable &CAT = ConflictAvoidanceTable());

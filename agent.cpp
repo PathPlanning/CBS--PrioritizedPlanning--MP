@@ -21,6 +21,14 @@ int Agent::getGoal_j() const
     return goal_j;
 }
 
+int Agent::getStartAngleId() const {
+    return startAngleId;
+}
+
+int Agent::getGoalAngleId() const {
+    return goalAngleId;
+}
+
 int Agent::getId() const
 {
     return id;
