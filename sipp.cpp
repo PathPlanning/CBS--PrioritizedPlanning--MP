@@ -58,11 +58,51 @@ void SIPP<NodeType>::createSuccessorsFromNode(const NodeType &cur, NodeType &nei
     //std::vector<std::pair<int, int>> safeIntervals;
     //getCellSafeIntervals(cells.back(), cur.g, cur.endTime, agentId, constraints, safeIntervals);
 
-    std::vector<std::pair<int, int>> safeIntervals = constraints.getSafeIntervals(
-                neigh.i, neigh.j, agentId,
-                cur.g + pr.intDuration,
-                addWithInfCheck(cur.endTime, pr.intDuration));
+    struct Event {
+        int time;
+        bool start;
+        int id;
 
+        bool operator<(const Event& other) const {
+            return time < other.time || time == other.time && start > other.start;
+        }
+    };
+
+    std::vector<Event> events;
+    for (int i = 0; i < this->mp.covering.size(); ++i) {
+        Cell cell = this->mp.covering[i];
+        std::vector<std::pair<int, int>> cellSafeIntervals = constraints.getSafeIntervals(
+            cell.i + neigh.i, cell.j + neigh.j, agentId,
+            cur.g + pr.intDuration,
+            addWithInfCheck(cur.endTime, pr.intDuration));
+        for (auto safeInterval : cellSafeIntervals) {
+            events.push_back(Event{safeInterval.first, true, i});
+            events.push_back(Event{safeInterval.second, false, i});
+        }
+    }
+    std::sort(events.begin(), events.end());
+    std::vector<std::pair<int, int>> safeIntervals;
+    std::set<int> safeCells;
+    int start;
+    for (auto event : events) {
+        if (event.start) {
+            safeCells.insert(event.id);
+            if (safeCells.size() == this->mp.covering.size()) {
+                start = event.time;
+            }
+        } else {
+            if (safeCells.size() == this->mp.covering.size()) {
+                safeIntervals.push_back(std::make_pair(start, event.time));
+            }
+            safeCells.erase(event.id);
+        }
+    }
+
+    int firstConstraintTime = CN_INFINITY;
+    for (auto cell : this->mp.covering) {
+        firstConstraintTime = std::min(firstConstraintTime,
+            constraints.getFirstConstraintTime(cell.i + cur.i, cell.j + cur.j, cur.g, agentId));
+    }
     for (auto interval : safeIntervals) {
         neigh.startTime = interval.first;
         neigh.endTime = interval.second;
@@ -86,7 +126,7 @@ void SIPP<NodeType>::createSuccessorsFromNode(const NodeType &cur, NodeType &nei
             continue;
         }
 
-        if (constraints.getFirstConstraintTime(cells[0].i, cells[0].j, cur.g, agentId) <= cur.g + waitTime) {
+        if (firstConstraintTime <= cur.g + waitTime) {
             break;
         }
 

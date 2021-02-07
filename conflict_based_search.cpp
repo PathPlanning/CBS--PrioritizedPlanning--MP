@@ -24,9 +24,11 @@ ConflictBasedSearch<SearchType>::~ConflictBasedSearch()
 
 template<typename SearchType>
 void ConflictBasedSearch<SearchType>::getOccupiedNodes(std::vector<SIPPNode> &nodes,
-                                                         std::list<Node>::iterator it,
-                                                         std::list<Node>::iterator end,
-                                                         int agentId, std::vector<int> &lastStart) {
+    std::list<Node>::iterator it,
+    std::list<Node>::iterator end,
+    int agentId,
+    std::map<std::tuple<int, int, int>, int> lastStarts)
+{
     if (std::next(it) != end) {
         Primitive pr = this->mp->getPrimitive(std::next(it)->primitiveId);
         auto cells = pr.getCells();
@@ -35,18 +37,29 @@ void ConflictBasedSearch<SearchType>::getOccupiedNodes(std::vector<SIPPNode> &no
             int start = std::next(it)->g - pr.intDuration;
             node.startTime = start + cell.interval.first;
             node.endTime = start + cell.interval.second;
-            nodes.push_back(node);
+
+            if (this->mp->isCovered(cell.i, cell.j, pr.target.i, pr.target.j)) {
+                lastStarts[std::make_tuple(agentId, cell.i - pr.target.i, cell.j - pr.target.j)] = node.startTime;
+            } else {
+                if (this->mp->isCovered(cell.i, cell.j, pr.source.i, pr.source.j)) {
+                    auto it = lastStarts.find(std::make_tuple(agentId, cell.i, cell.j));
+                    if (it != lastStarts.end()) {
+                        node.startTime = it->second;
+                    }
+                }
+                nodes.push_back(node);
+            }
         }
     } else {
-        SIPPNode node(it->i, it->j, nullptr, it->g);
-        node.endTime = CN_INFINITY;
-        nodes.push_back(node);
-    }
-
-    nodes[0].startTime = lastStart[agentId];
-    lastStart[agentId] = nodes.back().startTime;
-    if (nodes.back().endTime != CN_INFINITY) {
-        nodes.pop_back();
+        for (auto cell : this->mp->covering) {
+            SIPPNode node(it->i + cell.i, it->j + cell.j, nullptr, it->g);
+            node.endTime = CN_INFINITY;
+            auto it = lastStarts.find(std::make_tuple(agentId, cell.i, cell.j));
+            if (it != lastStarts.end()) {
+                node.startTime = it->second;
+            }
+            nodes.push_back(node);
+        }
     }
 }
 
@@ -150,7 +163,7 @@ ConflictSet ConflictBasedSearch<SearchType>::findConflict(
     std::vector<std::list<Node>::iterator> iters = starts;
     std::set<int> notFinished;
     std::map<std::pair<int, int>, std::set<IntervalBoundary>> boundaries;
-    std::vector<int> lastStart(starts.size(), 0);
+    std::map<std::tuple<int, int, int>, int> lastStarts;
 
     for (int i = 0; i < starts.size(); ++i) {
         if (i != agentId) {
@@ -160,7 +173,7 @@ ConflictSet ConflictBasedSearch<SearchType>::findConflict(
     if (agentId != -1) {
         for (auto it = starts[agentId]; it != ends[agentId]; ++it) {
             std::vector<SIPPNode> nodes;
-            getOccupiedNodes(nodes, it, ends[agentId], agentId, lastStart);
+            getOccupiedNodes(nodes, it, ends[agentId], agentId, lastStarts);
             addBoundaries(boundaries, nodes, agentId);
         }
     }
@@ -179,7 +192,7 @@ ConflictSet ConflictBasedSearch<SearchType>::findConflict(
             if (std::next(iters[j]) != ends[j]) {
                 newNotFinished.insert(j);
             }
-            getOccupiedNodes(nodes, iters[j], ends[j], j, lastStart);
+            getOccupiedNodes(nodes, iters[j], ends[j], j, lastStarts);
             getConflicts(map, agentSet, constraints, costs, LLExpansions, LLNodes, starts, ends,
                         boundaries, nodes, j, conflictSet, findAllConflicts, withCardinalConflicts);
             if (!findAllConflicts && !conflictSet.empty()) {
@@ -430,6 +443,8 @@ MultiagentSearchResult ConflictBasedSearch<SearchType>::startSearch(const Map &m
             result.time = static_cast<double>(elapsedMilliseconds) / 1000;
             break;
         }
+
+        //std::cout << conflictSet.cardinal.size() << " " << conflictSet.semiCardinal.size() << " " << conflictSet.nonCardinal.size() << std::endl;
 
         Conflict conflict = conflictSet.getBestConflict();
 

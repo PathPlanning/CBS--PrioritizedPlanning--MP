@@ -64,8 +64,14 @@ SearchResult ISearch<NodeType>::startSearch(const Map &map, const AgentSet &agen
 
         NodeType *curPtr = &(close.find(cur.convolution(map.getMapWidth(), map.getMapHeight(), withTime))->second);
         if (cur.i == goal_i && cur.j == goal_j && (goalAngleId == -1 || !mp.withTurns() || cur.angleId == goalAngleId)) {
-            if (!constraints.hasFutureConstraint(cur.i, cur.j, cur.g, agentId) &&
-                checkGoal(cur, goalTime, agentId, constraints)) {
+            bool hasFutureConstraint = false;
+            for (auto cell : mp.covering) {
+                if (constraints.hasFutureConstraint(cur.i + cell.i, cur.j + cell.j, cur.g, agentId)) {
+                    hasFutureConstraint = true;
+                    break;
+                }
+            }
+            if (!hasFutureConstraint && checkGoal(cur, goalTime, agentId, constraints)) {
                 sresult.pathfound = true;
                 break;
             } else {

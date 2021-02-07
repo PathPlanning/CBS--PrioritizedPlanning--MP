@@ -132,6 +132,14 @@ public:
         return std::max(begin, std::min(val, end));
     }
 
+    double minDistToCell(Cell cell, double i, double j, double cellSize) {
+        double closest_i = clip(double(cell.i) - cellSize, double(cell.i) + cellSize, i);
+        double closest_j = clip(double(cell.j) - cellSize, double(cell.j) + cellSize, j);
+        double dist = std::sqrt(pow(i - closest_i, 2) + pow(j - closest_j, 2));
+        //double dist = std::sqrt(pow(i - double(cell.i), 2) + pow(j - double(cell.j), 2));
+        return dist;
+    }
+
     double getEndpoint(Cell cell, double begin, double end, double resolution, double size, bool start)
     {
         if(resolution < CN_RESOLUTION)
@@ -145,10 +153,8 @@ public:
         while(true)
         {
             Point pos = this->getPos(cur_t);
-            double closest_i = clip(double(cell.i) - size, double(cell.i) + size, pos.i);
-            double closest_j = clip(double(cell.j) - size, double(cell.j) + size, pos.j);
-            double dist = pow(pos.i - closest_i, 2) + pow(pos.j - closest_j, 2);
-            if((start && dist < pow(agentSize, 2)) || (!start && dist > pow(agentSize, 2)))
+            double dist = minDistToCell(cell, pos.i, pos.j, size);
+            if((start && dist < agentSize) || (!start && dist > agentSize))
             {
                 if(cur_t - resolution < 0)
                     return 0;
@@ -222,41 +228,19 @@ public:
     {
         double t(0);
         bool stop(false);
+        int max_diff = int(agentSize + 0.5) + 2;
         while(t < duration + CN_EPSILON)
         {
-            double angle = getAngle(t);
-            double gap_i = cos(angle)*0.5;
-            double gap_j = sin(angle)*0.5;
             auto p = getPos(t);
-            int c_i(p.i+gap_i+0.5-1e-3);
-            if(p.i+gap_i < 0)
-                c_i = p.i+gap_i-0.5+1e-3;
-            int c_j(p.j-gap_j+0.5-1e-3);
-            if(p.j-gap_j < 0)
-                c_j = p.j-gap_j-0.5+1e-3;
-            Cell c(c_i, c_j);
-            if(std::find(cells.begin(), cells.end(), c) == cells.end())
-                cells.push_back(c);
-
-            c_i = p.i-gap_i+0.5-1e-3;
-            if(p.i-gap_i < 0)
-                c_i = p.i-gap_i-0.5+1e-3;
-            c_j = p.j+gap_j+0.5-1e-3;
-            if(p.j+gap_j < 0)
-                c_j = p.j+gap_j-0.5+1e-3;
-            c = Cell(c_i, c_j);
-            if(std::find(cells.begin(), cells.end(), c) == cells.end())
-                cells.push_back(c);
-
-            c_i = p.i+0.5-1e-3;
-            if(p.i < 0)
-                c_i = p.i-0.5+1e-3;
-            c_j = p.j+0.5-1e-3;
-            if(p.j < 0)
-                c_j = p.j-0.5+1e-3;
-            c = Cell(c_i, c_j);
-            if(std::find(cells.begin(), cells.end(), c) == cells.end())
-                cells.push_back(c);
+            for (int diff_i = -max_diff; diff_i <= max_diff; ++diff_i) {
+                for (int diff_j = -max_diff; diff_j <= max_diff; ++diff_j) {
+                    Cell cell(int(p.i) + diff_i, int(p.j) + diff_j);
+                    if (minDistToCell(cell, p.i, p.j, 0.5) < agentSize &&
+                        std::find(cells.begin(), cells.end(), cell) == cells.end()) {
+                        cells.push_back(cell);
+                    }
+                }
+            }
 
             if(t + 0.1 >= duration)
             {
@@ -308,6 +292,8 @@ class Primitives
     std::vector<std::vector<Primitive>> type1;
     std::vector<std::vector<Primitive>> type2;
     int time_resolution;
+    std::vector<Cell> covering;
+    int coveringRadius;
     bool loadPrimitives(const char* FileName, int Time_resolution, int scale, double agentSize)
     {
         time_resolution = Time_resolution;
@@ -481,6 +467,18 @@ class Primitives
         }
     }
 
+    void countCovering() {
+        for (int i = -coveringRadius; i <= coveringRadius; ++i) {
+            for (int j = -coveringRadius; j <= coveringRadius; ++j) {
+                covering.push_back(Cell(i, j));
+            }
+        }
+    }
+
+    bool isCovered(int i, int j, int center_i, int center_j) const {
+        return fabs(i - center_i) <= coveringRadius && fabs(j - center_j) <= coveringRadius;
+    }
+
     void makeTwoKNeigh(int k, int Time_resolution, int scale, double agentSize) {
         time_resolution = Time_resolution;
         std::vector<std::pair<int, int>> quad = {{scale, 0}, {0, scale}};
@@ -538,8 +536,14 @@ class Primitives
 
             prim.countCells();
             prim.countIntervals(0.5, time_resolution);
+
             type0[0].push_back(prim);
         }
+
+        coveringRadius = int(agentSize * scale + 0.5 - CN_EPSILON);
+        countCovering();
     }
+
+
 };
 #endif
