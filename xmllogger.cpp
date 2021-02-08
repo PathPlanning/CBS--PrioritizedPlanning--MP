@@ -189,7 +189,9 @@ void XmlLogger::writeToLogAgentsPaths(const AgentSet& agentSet,
                         agentsPaths[i][j - 1].g, agentsPaths[i][j].g, step, 100);
             } else {
                 positions = {std::make_tuple(agentsPaths[i][j - 1].i, agentsPaths[i][j - 1].j, 0, Primitive::idToAngle(agentsPaths[i][j - 1].angleId)),
-                             std::make_tuple(agentsPaths[i][j].i, agentsPaths[i][j].j, pr.duration, Primitive::idToAngle(agentsPaths[i][j].angleId))};
+                             std::make_tuple(agentsPaths[i][j].i, agentsPaths[i][j].j,
+                             double(agentsPaths[i][j].g - agentsPaths[i][j - 1].g) / 1000,
+                             Primitive::idToAngle(agentsPaths[i][j].angleId))};
             }
 
             for (int k = 0; k < positions.size() - 1; ++k) {
