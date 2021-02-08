@@ -48,7 +48,7 @@ protected:
                            std::vector<int> &LLExpansions, std::vector<int> &LLNodes, CBSNode *parentPtr);
         void getOccupiedNodes(std::vector<SIPPNode> &nodes,
                               std::list<Node>::iterator it, std::list<Node>::iterator end,
-                              int agentId, std::map<std::tuple<int, int, int>, int> lastStarts);
+                              int agentId, std::map<std::tuple<int, int, int>, int>& lastStarts);
 
         void getConflicts(const Map &map, const AgentSet &agentSet,
                           const ConstraintsSet &constraints, const std::vector<int> &costs,

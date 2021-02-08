@@ -27,7 +27,7 @@ void ConflictBasedSearch<SearchType>::getOccupiedNodes(std::vector<SIPPNode> &no
     std::list<Node>::iterator it,
     std::list<Node>::iterator end,
     int agentId,
-    std::map<std::tuple<int, int, int>, int> lastStarts)
+    std::map<std::tuple<int, int, int>, int>& lastStarts)
 {
     if (std::next(it) != end) {
         Primitive pr = this->mp->getPrimitive(std::next(it)->primitiveId);
