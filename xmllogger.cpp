@@ -173,10 +173,10 @@ void XmlLogger::writeToLogAgentsPaths(const AgentSet& agentSet,
         Agent agent = agentSet.getAgent(i);
         XMLElement *agentElement = doc.NewElement(CNS_TAG_AGENT);
         agentElement->SetAttribute(CNS_TAG_ATTR_ID, i);
-        agentElement->SetAttribute(CNS_TAG_ATTR_STARTX, agent.getStart_j() / scale);
-        agentElement->SetAttribute(CNS_TAG_ATTR_STARTY, agent.getStart_i() / scale);
-        agentElement->SetAttribute(CNS_TAG_ATTR_GOALX, agent.getGoal_j() / scale);
-        agentElement->SetAttribute(CNS_TAG_ATTR_GOALY, agent.getGoal_i() / scale);
+        agentElement->SetAttribute(CNS_TAG_ATTR_STARTX, int(agent.getStart_j() / scale));
+        agentElement->SetAttribute(CNS_TAG_ATTR_STARTY, int(agent.getStart_i() / scale));
+        agentElement->SetAttribute(CNS_TAG_ATTR_GOALX, int(agent.getGoal_j() / scale));
+        agentElement->SetAttribute(CNS_TAG_ATTR_GOALY, int(agent.getGoal_i() / scale));
 
         XMLElement *pathElement = doc.NewElement(CNS_TAG_PATH);
         pathElement->SetAttribute(CNS_TAG_ATTR_PATH_FOUND, "true");
@@ -199,10 +199,10 @@ void XmlLogger::writeToLogAgentsPaths(const AgentSet& agentSet,
                 Point curPoint = Point(std::get<0>(positions[k]), std::get<1>(positions[k]));
                 Point nextPoint = Point(std::get<0>(positions[k + 1]), std::get<1>(positions[k + 1]));
                 sectionElement->SetAttribute(CNS_TAG_ATTR_ID, id++);
-                sectionElement->SetAttribute(CNS_TAG_ATTR_STARTX, curPoint.j / scale);
-                sectionElement->SetAttribute(CNS_TAG_ATTR_STARTY, curPoint.i / scale);
-                sectionElement->SetAttribute(CNS_TAG_ATTR_GOALX, nextPoint.j / scale);
-                sectionElement->SetAttribute(CNS_TAG_ATTR_GOALY, nextPoint.i / scale);
+                sectionElement->SetAttribute(CNS_TAG_ATTR_STARTX, int(curPoint.j / scale));
+                sectionElement->SetAttribute(CNS_TAG_ATTR_STARTY, int(curPoint.i / scale));
+                sectionElement->SetAttribute(CNS_TAG_ATTR_GOALX, int(nextPoint.j / scale));
+                sectionElement->SetAttribute(CNS_TAG_ATTR_GOALY, int(nextPoint.i / scale));
                 sectionElement->SetAttribute(CNS_TAG_ATTR_STARTH, std::get<3>(positions[k]) * 180 / CN_PI);
                 sectionElement->SetAttribute(CNS_TAG_ATTR_GOALH, std::get<3>(positions[k + 1]) * 180 / CN_PI);
                 sectionElement->SetAttribute(CNS_TAG_ATTR_DUR, std::get<2>(positions[k + 1]) - std::get<2>(positions[k]));

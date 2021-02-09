@@ -26,7 +26,10 @@ struct Conflict {
     }
 
     bool operator<(const Conflict &rhs) const {
-        return minIncrease > rhs.minIncrease || minIncrease == rhs.minIncrease && time < rhs.time;
+        return std::tuple<int, int, int, int, int, int, int, int>(
+                    -minIncrease, time, id1, id2, pos1.i, pos1.j, pos2.i, pos2.j) <
+                std::tuple<int, int, int, int, int, int, int, int>(
+                    -rhs.minIncrease, rhs.time, rhs.id1, rhs.id2, rhs.pos1.i, rhs.pos1.j, rhs.pos2.i, rhs.pos2.j);
     }
 };
 
